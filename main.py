@@ -9,12 +9,7 @@ st.set_page_config(
     page_title="Observatorio de Precios Estatales",
     page_icon="\U0001F441",
     layout="wide",
-    initial_sidebar_state="expanded",
-    server={
-        "enableXsrfProtection": False,
-        "enableWebsocketCompression": False,
-        "enableCORS": False
-    }
+    initial_sidebar_state="expanded"
 )
 
 # Definición de las páginas
