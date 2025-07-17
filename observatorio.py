@@ -507,83 +507,6 @@ def plot_map_abc_muni(df_abc, dfGeoDATA):
 
 
 
-def generar_calendario_compras(df_filtrado):
-    """
-    Genera un mapa de calor de calendario interactivo para visualizar compras por día.
-    
-    Args:
-        df_filtrado (pd.DataFrame): DataFrame con columnas ['Dia Publicacion', 'Mes Publicacion', 'Anio Publicacion']
-        
-    Returns:
-        plotly.graph_objects.Figure: Figura del calendario heatmap
-        pd.DataFrame: DataFrame con estadísticas resumidas
-    """
-    # Convertir a datetime
-    df = df_filtrado.copy()
-    df['Fecha'] = pd.to_datetime(df['Anio Publicacion'].astype(str) + '-' + 
-                                df['Mes Publicacion'].astype(str) + '-' + 
-                                df['Dia Publicacion'].astype(str))
-    
-    # Crear dataframe completo de fechas para el rango existente
-    fecha_min = df['Fecha'].min()
-    fecha_max = df['Fecha'].max()
-    rango_fechas = pd.date_range(start=fecha_min, end=fecha_max, freq='D')
-    
-    df_calendario = pd.DataFrame({
-        'Fecha': rango_fechas,
-        'Dia': rango_fechas.day,
-        'Mes': rango_fechas.month,
-        'Dia_semana': rango_fechas.dayofweek,
-        'Semana': rango_fechas.isocalendar().week,
-        'Anio': rango_fechas.year,
-        'Mes_Nombre': rango_fechas.strftime('%B')
-    })
-    
-    # Contar compras por día
-    compras_por_dia = df.groupby('Fecha').size().reset_index(name='Compras')
-    df_calendario = df_calendario.merge(compras_por_dia, on='Fecha', how='left')
-    df_calendario['Compras'] = df_calendario['Compras'].fillna(0).astype(int)
-    
-    # Generar el heatmap de calendario
-    fig = px.density_heatmap(
-        df_calendario,
-        x='Dia_semana',
-        y='Semana',
-        z='Compras',
-        facet_col='Mes_Nombre',
-        facet_col_wrap=4,
-        color_continuous_scale='YlOrRd',
-        category_orders={'Mes_Nombre': ['January', 'February', 'March', 'April', 
-                                      'May', 'June', 'July', 'August',
-                                      'September', 'October', 'November', 'December']},
-        labels={'Dia_semana': 'Día', 'Semana': 'Semana', 'Compras': 'N° Compras'}
-    )
-    
-    # Personalización avanzada
-    fig.update_layout(
-        plot_bgcolor='rgba(0,0,0,0)',
-        margin=dict(l=20, r=20, t=40, b=20),
-        height=900,
-        coloraxis_colorbar=dict(title='Compras')
-    )
-    
-    # Ejes y formato
-    dias_semana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-    fig.update_xaxes(ticktext=dias_semana, tickvals=[0,1,2,3,4,5,6])
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[1]))
-    
-    # Estadísticas resumidas
-    stats = {
-        'total_compras': int(df_calendario['Compras'].sum()),
-        'dia_max': df_calendario.loc[df_calendario['Compras'].idxmax()]['Fecha'],
-        'max_compras': int(df_calendario['Compras'].max()),
-        'promedio_diario': round(df_calendario['Compras'].mean(), 1)
-    }
-    
-    return fig, stats
-
-
-
 def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=None, anio_fin=None, mes_fin=None, Inflacion_Choice=None):
     # Normalizar claves de departamento
     dfGeoDATA['muni_key'] = dfGeoDATA['NAME_1'].str.replace(' ', '').str.lower().apply(unidecode)
@@ -2019,7 +1942,7 @@ def render_abc_block(
                 st.session_state[f"show_{state_prefix}_table"] = False
 
     # Resultados principales
-    if st.session_state[f"show_{state_prefix}_plots"]:
+    if st.session_state[f"show_{state_prefix}_plots", True]:
         col1ABC, col2ABC = st.columns([0.5, 0.5])
         abc_results = abc_analysis(df_filtrado, grupo_por=grupo_principal)
         with col1ABC:
