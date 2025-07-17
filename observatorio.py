@@ -2212,9 +2212,9 @@ st.markdown(
 st.set_page_config(
     layout="wide",
     # Desactiva el file watcher (necesario en Hugging Face)
-    server.enableXsrfProtection=False,
-    server.enableWebsocketCompression=False,
-    server.enableCORS=False,
+    server.enableXsrfProtection==False,
+    server.enableWebsocketCompression==False,
+    server.enableCORS==False,
 )
 
 # Opcional: Deshabilitar el watchdog explícitamente

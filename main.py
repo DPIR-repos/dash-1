@@ -6,9 +6,9 @@ st.set_page_config(
     page_icon="\U0001F441",
     layout="wide",
     initial_sidebar_state="expanded",
-    server.enableXsrfProtection=False,
-    server.enableWebsocketCompression=False,
-    server.enableCORS=False,
+    server.enableXsrfProtection==False,
+    server.enableWebsocketCompression==False,
+    server.enableCORS==False,
 )
 
 import os
