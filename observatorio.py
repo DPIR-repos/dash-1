@@ -2214,8 +2214,8 @@ st.set_page_config(
     # Desactiva el file watcher (necesario en Hugging Face)
     server.enableXsrfProtection==False,
     server.enableWebsocketCompression==False,
-    server.enableCORS==False,
-)
+    server.enableCORS==False
+    )
 
 # Opcional: Deshabilitar el watchdog explícitamente
 import os

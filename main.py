@@ -8,8 +8,8 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     server.enableXsrfProtection==False,
     server.enableWebsocketCompression==False,
-    server.enableCORS==False,
-)
+    server.enableCORS==False
+    )
 
 import os
 os.environ["STREAMLIT_SERVER_ENABLE_FILE_WATCHER"] = "false"
