@@ -2208,7 +2208,18 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Configuración para evitar el error del event loop
+st.set_page_config(
+    layout="wide",
+    # Desactiva el file watcher (necesario en Hugging Face)
+    server.enableXsrfProtection=False,
+    server.enableWebsocketCompression=False,
+    server.enableCORS=False,
+)
 
+# Opcional: Deshabilitar el watchdog explícitamente
+import os
+os.environ["STREAMLIT_SERVER_ENABLE_FILE_WATCHER"] = "false"
 
 
 # ---- 1. Cargar FontAwesome (agrega esto al inicio de tu script) ----
