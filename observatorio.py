@@ -1903,7 +1903,7 @@ def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
     
     return fig
 
-def plot_tiempo_adjudicacion(df, orden_variedades=None):
+def plot_tiempo_adjudicacion(df_filtrado, orden_variedades=None):
     """
     Calcula el tiempo de adjudicación (días entre publicación y adjudicación) y genera un gráfico de líneas por variedad (Unidad de Medida).
     
@@ -1915,6 +1915,7 @@ def plot_tiempo_adjudicacion(df, orden_variedades=None):
         tuple: (fig, df_tiempo), donde fig es el gráfico de Plotly y df_tiempo es el DataFrame con los datos calculados.
     """
     # Convertir fechas a datetime
+    df=df_filtrado.copy()
     df['Fecha_Publicacion'] = pd.to_datetime(
         df['Anio Publicacion'].astype(str) + '-' + 
         df['Mes Publicacion'].astype(str) + '-' + 
