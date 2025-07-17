@@ -1942,7 +1942,7 @@ def render_abc_block(
                 st.session_state[f"show_{state_prefix}_table"] = False
 
     # Resultados principales
-    if st.session_state[f"show_{state_prefix}_plots", True]:
+    if st.session_state.get(f"show_{state_prefix}_plots", True):
         col1ABC, col2ABC = st.columns([0.5, 0.5])
         abc_results = abc_analysis(df_filtrado, grupo_por=grupo_principal)
         with col1ABC:
