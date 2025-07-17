@@ -1921,14 +1921,14 @@ def render_abc_block(
 
     # Botones de acción
     with col2bot:
-        if st.button("📊", key=f"btn_plot_{state_prefix}"):
+        if st.button("📊", key=f"btn_plot_{state_prefix}", help="Mostrar gráficos"):
             st.session_state[f"show_{state_prefix}_plots"] = True
             st.session_state[f"show_{state_prefix}_table"] = False
             if show_map:
                 st.session_state[f"show_{state_prefix}_map"] = False
 
     with col3bot:
-        if st.button("🖽", key=f"btn_table_{state_prefix}"):
+        if st.button("🖽", key=f"btn_table_{state_prefix}", help="Mostrar tabla de datos"):
             st.session_state[f"show_{state_prefix}_table"] = True
             st.session_state[f"show_{state_prefix}_plots"] = False
             if show_map:
@@ -1936,7 +1936,7 @@ def render_abc_block(
 
     if show_map:
         with col4bot:
-            if st.button("🗺️", key=f"btn_map_{state_prefix}"):
+            if st.button("🗺️", key=f"btn_map_{state_prefix}", help="Mostrar mapa"):
                 st.session_state[f"show_{state_prefix}_map"] = True
                 st.session_state[f"show_{state_prefix}_plots"] = False
                 st.session_state[f"show_{state_prefix}_table"] = False
