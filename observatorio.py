@@ -845,7 +845,7 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
     # 4. Cálculo de estadísticas por departamento
     # =========================================================================
     # Precios originales
-    ventas_muni = df_ventas.groupby('muni_key').apply(lambda x: expanded_geometric_mean(x, 'Precio unitario')).reset_index()
+    ventas_muni = df_ventas.groupby('muni_key', group_keys=False).apply(lambda x: expanded_geometric_mean(x, 'Precio unitario')).reset_index()
     stdv_ventas_muni = df_ventas.groupby('muni_key').apply(lambda x: expanded_stdv(x, 'Precio unitario')).reset_index()
     ventas_muni.columns = ['muni_key', 'Precio_geo_mean']
     stdv_ventas_muni.columns = ['muni_key', 'Stdv_Precio']
@@ -1284,6 +1284,7 @@ def plot_precio_vs_unidades_inflacion(df, Inflacion=False, dfInflacion=None, ani
     df_clean = df[['Precio unitario', 'Cantidad Ofertada', 'Anio Publicacion', 'Mes Publicacion']].copy()
     if Inflacion and dfInflacion is not None and anio_fin is not None and mes_fin is not None and Inflacion_Choice is not None:
         if unidecode(Inflacion_Choice.lower()) == 'regional':
+            df_clean = df.copy()
             df_clean['Region Oferente'] = df.get('Region Oferente', None)
             df_clean = df_clean.dropna(subset=['Region Oferente'])
         precios_ajustados = []
@@ -2317,7 +2318,7 @@ def render_abc_block(
 #   FUNCIONES PARA CARGAR DATA
 #=================================
 @st.cache_data
-
+@st.cache_resource
 
 def load_data_year(year):
     """Carga y concatena todos los archivos CSV para un año específico"""
