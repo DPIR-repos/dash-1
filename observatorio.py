@@ -62,7 +62,7 @@ def fix_price_inflacion_mensual(dfInflacion, precio_inicial, anio_inicio, mes_in
     }
     
     
-    fecha_inicio=(anio_fin,mes_fin)
+    fecha_inicio=(anio_inicio,mes_inicio)
     fecha_fin=(anio_fin,mes_fin)
     
     # Si no se especifica corrección por inflación, devolver el precio original
