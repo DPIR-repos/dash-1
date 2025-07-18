@@ -2979,7 +2979,9 @@ if len(year)>=1:
 #   ANALISIS RFM
 #==============================                                
         with tab3:
-             st.markdown("## Análisis RFM")
+            st.markdown("## Análisis RFM", help="""El **análisis RFM** es una técnica poderosa para evaluar el compromiso y valor de cualquier entidad o interacción, 
+                        ya sean clientes, instituciones o tipos de productos. Se basa en tres dimensiones clave: **Recencia (R)**, que mide cuán recientemente ocurrió la interacción;
+                        **Frecuencia (F)**, que evalúa con qué asiduidad se repite; **Valor Monetario (M)**, que cuantifica el valor económico.""" )
 
             with st.expander("## **Análisis por variedad**", expanded=False):
                 col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])
