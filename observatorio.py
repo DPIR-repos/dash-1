@@ -906,8 +906,8 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
         fitbounds="locations",
         visible=False,
         projection_scale=5,
-        center={"lat": gdf_merge.geometry.centroid.y.mean(), 
-                "lon": gdf_merge.geometry.centroid.x.mean()},
+        #center={"lat": gdf_merge.geometry.centroid.y.mean(), 
+        #        "lon": gdf_merge.geometry.centroid.x.mean()},
         bgcolor='rgba(0,0,0,0)'
     )
 
