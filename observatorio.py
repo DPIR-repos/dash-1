@@ -3276,8 +3276,7 @@ if len(year)>=1:
 #   ANALISIS ABC
 #==============================
         with tab4:
-            st.markdown("## Análisis ABC", help="""
-                        El **análisis ABC** es una técnica de clasificación que permite priorizar productos o insumos
+            st.markdown("## Análisis ABC", help=""" El **análisis ABC** es una técnica de clasificación que permite priorizar productos o insumos
                         en función de su impacto económico total. Agrupa los elementos en tres categorías:
 
                         - **Clase A**: productos críticos que representan la mayor parte del valor ofertado,
