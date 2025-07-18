@@ -1279,13 +1279,6 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
     
     return fig
 
-import streamlit as st
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-from sklearn.linear_regression import LinearRegression
-import scipy.stats as sps
-from unidecode import unidecode
 
 def plot_precio_vs_unidades_inflacion(df, Inflacion=False, dfInflacion=None, anio_fin=None, mes_fin=None, Inflacion_Choice=None):
     """
