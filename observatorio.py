@@ -3338,22 +3338,22 @@ if len(year)>=1:
         if df_filtrado:
             change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
                             'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
-            df_filtrado=df_filtrado.rename(columns=change_columns)
+            df_filtrado_2=df_filtrado.rename(columns=change_columns)
         if formato_descarga == "CSV":
             file_extension = "csv"
             mime_type = "text/csv"
-            data = df_filtrado.to_csv(index=False).encode('utf-8-sig')
+            data = df_filtrado_2.to_csv(index=False).encode('utf-8-sig')
         elif formato_descarga == "TXT":
             file_extension = "txt"
             mime_type = "text/plain"
-            data = df_filtrado.to_csv(index=False, sep='\t').encode('utf-8-sig')  # TXT con tabulador
+            data = df_filtrado_2.to_csv(index=False, sep='\t').encode('utf-8-sig')  # TXT con tabulador
         else:  # Excel (XLSX)
             file_extension = "xlsx"
             mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             from io import BytesIO
             output = BytesIO()
             with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df_filtrado.to_excel(writer, index=False)
+                df_filtrado_2.to_excel(writer, index=False)
             data = output.getvalue()
 
         # Nombre del archivo con año y formato
