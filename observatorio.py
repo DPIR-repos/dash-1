@@ -3313,11 +3313,7 @@ if len(year)>=1:
 else:
 # Mensaje de bienvenida
     st.markdown("""
-    <div style="text-align: center; margin: 30px 0;">
-        <img src="https://www.ine.gob.gt/ine/wp-content/uploads/2017/09/cropped-INE.png" width="200" style="margin-bottom: 20px;">
-    </div>
-
-    ## Bienvenido al Sistema de Monitoreo de Compras Públicas
+    Bienvenido al Sistema de Monitoreo de Compras Públicas
 
     **Herramienta oficial** de la *Dirección de Precios e Índices de Referencia* para el análisis estratégico de precios en contrataciones estatales.
 
