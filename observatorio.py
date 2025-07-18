@@ -3314,9 +3314,9 @@ else:
 # Mensaje de bienvenida
     st.markdown("""
     <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin-top: 30px;">
-    <p> <br> Bienvenido al Sistema de Monitoreo de Precios Estatales </br> </p>
+    <p>  **Bienvenido al Sistema de Monitoreo de Precios Estatales**  </p>
 
-    Esta herramienta, desarrollada por la Dirección de Precios e Índices de Referencia (DPIR), 
+    Esta herramienta, desarrollada por la **Dirección de Precios e Índices de Referencia (DPIR)**, 
     está diseñada para el análisis estratégico de precios en contrataciones públicas. Los datos 
     que se visualizan aquí han sido extraídos directamente de Guatecompras, y la asignación del 
     código de insumo se ha realizado mediante el modelo all-MiniLM-L6-v2-similarity-es. 
