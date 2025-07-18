@@ -81,7 +81,10 @@ def fix_price_inflacion_mensual(dfInflacion, precio_inicial, anio_inicio, mes_in
             'IPC'
         ].iloc[0]
 
-        precio_final = precio_inicial * (IPC_fin/IPC_init)
+        if anio_fin>anio_inicio and mes_fin > mes_inicio:
+            precio_final = precio_inicial * (IPC_fin/IPC_init)
+        else:
+            precio_final=precio_inicial
         
     elif tipo_inflacion == 'regional':
         if region is None:
@@ -99,7 +102,10 @@ def fix_price_inflacion_mensual(dfInflacion, precio_inicial, anio_inicio, mes_in
             'IPC_R'+str(regiones_gt[unidecode(region.lower())])
         ].iloc[0]
         
-        precio_final = precio_inicial * (IPC_fin/IPC_init)
+        if anio_fin>anio_inicio and mes_fin > mes_inicio:
+            precio_final = precio_inicial * (IPC_fin/IPC_init)
+        else:
+            precio_final=precio_inicial
         
     else:
         # Si el tipo de inflación no es reconocido, devolver el precio original
