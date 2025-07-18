@@ -2728,7 +2728,7 @@ if len(year)>=1:
         tab1, tab2, tab3, tab4 = st.tabs([
             "ℹ **Inf. General**", 
             "💰 **Análisis Precios**", 
-            "🔄 Análisis RFM",
+            "🔄 **Análisis RFM**",
             " **Análisis** 🅰️🅱️©️"
         ])
                 
