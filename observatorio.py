@@ -3314,7 +3314,7 @@ else:
 # Mensaje de bienvenida
     st.markdown("""
     <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin-top: 30px;">
-    <p>  **Bienvenido al Sistema de Monitoreo de Precios Estatales**  </p>
+    <p>  <strong> Bienvenido al Sistema de Monitoreo de Precios Estatales </strong>  </p>
 
     Esta herramienta, desarrollada por la **Dirección de Precios e Índices de Referencia (DPIR)**, 
     está diseñada para el análisis estratégico de precios en contrataciones públicas. Los datos 
