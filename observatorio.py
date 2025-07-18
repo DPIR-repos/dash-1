@@ -2980,7 +2980,14 @@ if len(year)>=1:
 #==============================                                
         with tab3:
             st.markdown("## Análisis RFM")
-            st.caption("El análisis RFM evalúa Recencia, Frecuencia y Valor Monetario para medir comportamiento y valor económico.")
+            st.tooltip("""
+            El **análisis RFM** es una técnica poderosa para evaluar el compromiso y valor de cualquier entidad o interacción, 
+            ya sean clientes, instituciones o tipos de productos. Se basa en tres dimensiones clave: 
+            - **Recencia (R)**: cuán recientemente ocurrió la interacción.
+            - **Frecuencia (F)**: con qué asiduidad se repite.
+            - **Valor Monetario (M)**: el valor económico asociado.
+            """)
+
 
 
             with st.expander("## **Análisis por variedad**", expanded=False):
