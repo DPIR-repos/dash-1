@@ -3338,10 +3338,9 @@ if len(year)>=1:
             options=["CSV", "TXT", "Excel (XLSX)"],
             index=0,
             horizontal=True,
-            key="formato_descarga"  # Clave única para el widget
+            key="formato_descarga"
         )
 
-        # Solo mostrar botón si hay datos filtrados
         if df_filtrado is not None:
             # Renombrar columnas
             change_columns = {
@@ -3363,29 +3362,43 @@ if len(year)>=1:
                 file_extension = "txt"
             elif formato_descarga == "Excel (XLSX)":
                 from io import BytesIO
+                from openpyxl import Workbook
+                
                 output = BytesIO()
-                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                    df_filtrado_2.to_excel(writer, index=False)
-                    writer.close()  # Importante para Excel
+                wb = Workbook()
+                ws = wb.active
+                
+                # Escribir encabezados
+                for col_num, column_name in enumerate(df_filtrado_2.columns, 1):
+                    ws.cell(row=1, column=col_num, value=column_name)
+                
+                # Escribir datos
+                for row_num, row_data in enumerate(df_filtrado_2.values, 2):
+                    for col_num, cell_value in enumerate(row_data, 1):
+                        ws.cell(row=row_num, column=col_num, value=cell_value)
+                
+                wb.save(output)
                 data = output.getvalue()
                 mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 file_extension = "xlsx"
             
-            # Generar nombre de archivo dinámico
+            # Generar nombre de archivo
             from datetime import datetime
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"datos_filtrados_{year}_{timestamp}.{file_extension}"
             
-            # Botón de descarga con estilo mejorado
+            # Botón de descarga
             st.sidebar.download_button(
                 label=f"⬇️ Descargar como {formato_descarga}",
                 data=data,
                 file_name=filename,
                 mime=mime_type,
                 help=f"Descarga los datos filtrados en formato {formato_descarga}",
-                use_container_width=True,  # Mejor ajuste al contenedor
-                key=f"download_{timestamp}"  # Clave única para evitar caché
+                use_container_width=True,
+                key=f"download_{timestamp}"
             )
+        else:
+            st.sidebar.warning("No hay datos disponibles para descargar")
     #st.write(df_filtrado)
     # Mostramos el DataFrame filtrado
     #st.write(df_filtrado)
