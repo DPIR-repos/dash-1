@@ -3339,7 +3339,7 @@ if len(year)>=1:
         )
 
         # --- Botón de descarga dinámico ---
-        if df_filtrado:
+        if df_filtrado is not None:
             change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
                             'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
             df_filtrado_2=df_filtrado.rename(columns=change_columns).copy()
