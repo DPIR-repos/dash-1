@@ -3276,18 +3276,11 @@ if len(year)>=1:
 #   ANALISIS ABC
 #==============================
         with tab4:
-            st.markdown("## Análisis ABC", help=""" El **análisis ABC** es una técnica de clasificación que permite priorizar productos o insumos
-                        en función de su impacto económico total. Agrupa los elementos en tres categorías:
-
-                        - **Clase A**: productos críticos que representan la mayor parte del valor ofertado,
-                        aunque sean pocos en número.
-                        - **Clase B**: productos intermedios que contribuyen moderadamente al valor.
-                        - **Clase C**: numerosos productos con bajo impacto individual.
-
-                        Este análisis sigue el principio de Pareto: aproximadamente el 20% de los productos
-                        representan el 80% del valor. Es útil para enfocar estrategias de monitoreo,
-                        control de precios y eficiencia en las compras públicas.
-                        """)
+            st.markdown("## Análisis ABC", help=""" El **análisis ABC** es una técnica de clasificación que permite priorizar productos o insumos 
+                        en función de su impacto económico total. Agrupa los elementos en tres categorías: **Clase A**: productos críticos que representan la mayor parte del valor ofertado,
+                        aunque sean pocos en número. **Clase B**: productos intermedios que contribuyen moderadamente al valor. **Clase C**: numerosos productos con bajo impacto individual. 
+                        Este análisis sigue el principio de Pareto: aproximadamente el 20% de los productos representan el 80% del valor. Es útil para enfocar estrategias de monitoreo,
+                        control de precios y eficiencia en las compras públicas.""")
             
             with st.expander("**Análisis por variedad**", expanded=False):
                 render_abc_block(df_filtrado, "Variedad", "variedad", grupo_principal="Unidad de Medida", show_map=False)
