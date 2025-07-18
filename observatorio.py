@@ -797,8 +797,8 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
     # 1. Normalización de nombres de departamentos
     # =========================================================================
     # Crear claves normalizadas (sin espacios, minúsculas, sin acentos) para unir datos
-    dfGeoDATA['muni_key'] = dfGeoDATA['NAME_1'].str.replace(' ', '').str.lower().apply(unidecode)
-    df_ventas['muni_key'] = df_ventas['Region Oferente'].str.replace(' ', '').str.lower().apply(unidecode)
+    dfGeoDATA['muni_key'] = dfGeoDATA['NAME_1'].str.replace(' ', '').str.lower().apply(unidecode).copy()
+    df_ventas['muni_key'] = df_ventas['Region Oferente'].str.replace(' ', '').str.lower().apply(unidecode).copy()
 
     # =========================================================================
     # 2. Corrección por inflación (si se especifica)
