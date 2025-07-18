@@ -235,8 +235,70 @@ def abc_analysis(
     mes_fin=None,
     Inflacion_Choice=None
 ):
-    # Copia del DataFrame y conversión de tipos
-    df = df.copy()
+    """
+    Realiza un análisis ABC (Pareto) sobre datos de ofertas, generando visualizaciones y resultados detallados.
+    
+    El análisis ABC clasifica los elementos en tres categorías:
+    - A: Elementos que representan aproximadamente el 80% del valor total (20% superior)
+    - B: Elementos que representan el 15% siguiente del valor total
+    - C: Elementos que representan el 5% restante del valor total
+
+    Args:
+        df (pd.DataFrame): DataFrame con los datos de ofertas que debe contener:
+            - 'Cantidad Ofertada': Cantidad de unidades ofertadas
+            - 'Precio unitario': Precio por unidad
+            - Columna especificada en 'grupo_por': Categoría para agrupación
+            
+        grupo_por (str, optional): Nombre de la columna para agrupar los elementos. Default: "Unidad de Medida"
+        
+        inflacion (bool, optional): Si es True, aplica corrección por inflación. Default: False
+        
+        dfInflacion (pd.DataFrame, optional): DataFrame con datos de inflación. Requerido si inflacion=True.
+        
+        anio_fin (int, optional): Año de referencia para corrección. Requerido si inflacion=True.
+        
+        mes_fin (int, optional): Mes de referencia para corrección. Requerido si inflacion=True.
+        
+        Inflacion_Choice (str, optional): Tipo de corrección ('Nacional', 'Regional', etc.). Requerido si inflacion=True.
+
+    Returns:
+        tuple: Contiene cuatro elementos:
+            - fig_bar (plotly.graph_objects.Figure): Gráfico de barras de la distribución ABC
+            - fig_pie (plotly.graph_objects.Figure): Gráfico circular del valor por categoría ABC
+            - df_abc (pd.DataFrame): DataFrame con la clasificación ABC detallada
+            - resumen (pd.DataFrame): Resumen estadístico por categoría ABC
+
+    Example:
+        >>> # Análisis básico sin corrección por inflación
+        >>> fig_bar, fig_pie, df_abc, resumen = abc_analysis(df_ofertas)
+        >>>
+        >>> # Análisis con corrección por inflación
+        >>> fig_bar_corr, fig_pie_corr, df_abc_corr, resumen_corr = abc_analysis(
+        ...     df_ofertas,
+        ...     inflacion=True,
+        ...     dfInflacion=df_inflacion,
+        ...     anio_fin=2023,
+        ...     mes_fin=12,
+        ...     Inflacion_Choice='Nacional'
+        ... )
+
+    Notes:
+        - Los colores utilizados son:
+          * Azul (#1f77b4) para categoría A
+          * Celeste (#17becf) para categoría B
+          * Rojo (#d62728) para categoría C
+        - Para casos con menos de 3 elementos, se aplica una clasificación especial:
+          * 1 elemento: A
+          * 2 elementos: A, B
+          * 3 elementos: A, B, C
+    """
+    
+    # =========================================================================
+    # 1. Preparación inicial de datos
+    # =========================================================================
+    df = df.copy()  # Evitar modificar el DataFrame original
+    
+    # Conversión de tipos numéricos
     df["Cantidad Ofertada"] = pd.to_numeric(df["Cantidad Ofertada"], errors="coerce")
     df["Precio unitario"] = pd.to_numeric(df["Precio unitario"], errors="coerce")
 
@@ -244,11 +306,14 @@ def abc_analysis(
     if grupo_por not in df.columns:
         raise ValueError(f"La columna '{grupo_por}' no existe en el DataFrame.")
 
-    # Limpieza de datos
+    # Limpieza de datos faltantes
     df = df.dropna(subset=["Cantidad Ofertada", "Precio unitario", grupo_por])
 
-    # Ajuste por inflación si se requiere
-    if inflacion and dfInflacion is not None and anio_fin is not None and mes_fin is not None and Inflacion_Choice is not None:
+    # =========================================================================
+    # 2. Ajuste por inflación (si se especifica)
+    # =========================================================================
+    if all([inflacion, dfInflacion is not None, anio_fin is not None, 
+            mes_fin is not None, Inflacion_Choice is not None]):
         df["Precio Corregido"] = df.apply(
             lambda row: fix_price_inflacion_mensual(
                 dfInflacion,
@@ -266,7 +331,9 @@ def abc_analysis(
     else:
         df["Valor Total"] = df["Cantidad Ofertada"] * df["Precio unitario"]
 
-    # Agrupación y ordenamiento
+    # =========================================================================
+    # 3. Agrupación y cálculo de valores totales
+    # =========================================================================
     df_abc = df.groupby(grupo_por, as_index=False).agg({"Valor Total": "sum"})
     df_abc = df_abc.sort_values(by="Valor Total", ascending=False).reset_index(drop=True)
 
@@ -274,17 +341,23 @@ def abc_analysis(
     df_abc["Porcentaje"] = df_abc["Valor Total"] / df_abc["Valor Total"].sum()
     df_abc["Porcentaje Acumulado"] = df_abc["Porcentaje"].cumsum()
 
-    # Función de clasificación ABC
+    # =========================================================================
+    # 4. Clasificación ABC
+    # =========================================================================
     def clasificar_pct(df_pct):
+        """Clasifica elementos en categorías ABC basado en el porcentaje acumulado."""
         n = len(df_pct)
         clasificaciones = []
+        
+        # Casos especiales para pocos elementos
         if n == 1:
             clasificaciones = ["A"]
         elif n == 2:
             clasificaciones = ["A", "B"]
-        elif n==3:
+        elif n == 3:
             clasificaciones = ["A", "B", "C"]
         else:
+            # Clasificación estándar (80/15/5)
             for pct_acum in df_pct["Porcentaje Acumulado"]:
                 if pct_acum <= 0.8:
                     clasificaciones.append("A")
@@ -296,7 +369,9 @@ def abc_analysis(
 
     df_abc["Clasificación"] = clasificar_pct(df_abc)
 
-    # Resumen ABC (asegurando todas las categorías)
+    # =========================================================================
+    # 5. Resumen estadístico por categoría
+    # =========================================================================
     categorias = ['A', 'B', 'C']
     resumen = (
         df_abc.groupby('Clasificación')
@@ -304,12 +379,12 @@ def abc_analysis(
             'Elementos': (grupo_por, 'count'),
             'Valor Total': ('Valor Total', 'sum')
         })
-        .reindex(categorias)
-        .fillna(0)
+        .reindex(categorias)  # Asegurar todas las categorías
+        .fillna(0)           # Rellenar con 0 si alguna categoría falta
         .reset_index()
     )
 
-    # Cálculo de porcentajes en resumen
+    # Cálculo de porcentajes en el resumen
     total_valor = resumen['Valor Total'].sum()
     total_elementos = resumen['Elementos'].sum()
     
@@ -320,39 +395,49 @@ def abc_analysis(
         lambda x: (x / total_elementos * 100) if total_elementos > 0 else 0
     )
 
-    # Configuración de colores
+    # =========================================================================
+    # 6. Visualizaciones
+    # =========================================================================
+    # Paleta de colores para las categorías
     color_discrete_map = {
         "A": "#1f77b4",  # Azul
         "B": "#17becf",  # Celeste
         "C": "#d62728"   # Rojo
     }
 
-    # Gráfico de barras
+    # 6.1 Gráfico de barras de la distribución ABC
     fig_bar = px.bar(
         df_abc,
         x=grupo_por,
         y="Valor Total",
         color="Clasificación",
-        title=f"Distribución ABC por {grupo_por}",
+        title=f"<b>Distribución ABC por {grupo_por}</b>",
         labels={"Valor Total": "Valor ofertado (Q)"},
         hover_data=["Porcentaje", "Porcentaje Acumulado"],
         color_discrete_map=color_discrete_map
     )
-    fig_bar.update_layout(xaxis_title=None)
+    
+    # Personalización del gráfico de barras
+    fig_bar.update_layout(
+        xaxis_title=None,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        hovermode='x unified'
+    )
 
-    # Gráfico de pie (mostrando solo categorías con valor > 0)
+    # 6.2 Gráfico circular del valor por categoría
     fig_pie = px.pie(
-        resumen[resumen['Valor Total'] > 0],
+        resumen[resumen['Valor Total'] > 0],  # Mostrar solo categorías con valor
         values="Valor Total",
         names="Clasificación",
-        title="Distribución del Valor por Clasificación ABC",
-        hole=0.4,
+        title="<b>Distribución del Valor por Clasificación ABC</b>",
+        hole=0.4,  # Donut chart
         color='Clasificación',
         color_discrete_map=color_discrete_map,
         category_orders={'Clasificación': categorias}
     )
 
-    # Ajustes finales para el pie chart
+    # Personalización del gráfico circular
     fig_pie.update_traces(
         textposition='inside',
         textinfo='percent+label',
@@ -362,7 +447,7 @@ def abc_analysis(
 
     fig_pie.update_layout(
         legend=dict(
-            title_text='Clasificación',
+            title_text='<b>Clasificación</b>',
             orientation='h',
             yanchor='bottom',
             y=-0.2,
@@ -370,150 +455,356 @@ def abc_analysis(
             x=0.5
         ),
         uniformtext_minsize=12,
-        uniformtext_mode='hide'
+        uniformtext_mode='hide',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
     )
 
     return fig_bar, fig_pie, df_abc, resumen
 
 def plot_map_abc_dep(df_abc, dfGeoDATA):
-    # Preparar claves de unión
-    dfGeoDATA = dfGeoDATA.copy()
-    dfGeoDATA['muni_key'] = dfGeoDATA['NAME_1'].str.replace(' ', '').str.lower().apply(unidecode)
+    """
+    Genera un mapa coroplético interactivo mostrando la clasificación ABC por departamento.
+    
+    Esta función visualiza la clasificación ABC (A, B, C) de departamentos en un mapa interactivo,
+    permitiendo identificar patrones geográficos en la categorización. Los departamentos sin
+    clasificación se muestran en color distintivo.
 
+    Args:
+        df_abc (pd.DataFrame): DataFrame con los datos de clasificación ABC que debe contener:
+            - Columna 0: Nombre del departamento
+            - Última columna: Clasificación ABC ('A', 'B' o 'C')
+            
+        dfGeoDATA (gpd.GeoDataFrame): GeoDataFrame con las geometrías de los departamentos que debe contener:
+            - 'NAME_1': Nombre del departamento
+            - 'geometry': Geometrías para el mapeo
+
+    Returns:
+        plotly.graph_objects.Figure: Mapa coroplético interactivo con la clasificación ABC por departamento
+
+    Example:
+        >>> # Cargar datos de clasificación y geometrías
+        >>> df_clasificacion = pd.read_csv('abc_departamentos.csv')
+        >>> geo_departamentos = gpd.read_file('departamentos.geojson')
+        >>>
+        >>> # Generar y mostrar el mapa
+        >>> mapa = plot_map_abc_dep(df_clasificacion, geo_departamentos)
+        >>> mapa.show()
+
+    Notes:
+        - Paleta de colores utilizada:
+          * Azul (#1f77b4) para categoría A (alto valor/prioridad)
+          * Celeste (#17becf) para categoría B (valor medio)
+          * Rojo (#d62728) para categoría C (bajo valor)
+          * Gris claro (#fbfbfb) para no clasificados
+        - El mapa se ajusta automáticamente al área geográfica de los departamentos
+        - Los tooltips muestran el nombre del departamento al pasar el cursor
+    """
+    
+    # =========================================================================
+    # 1. Preparación de datos: normalización de nombres para unión
+    # =========================================================================
+    # Crear copias para evitar modificar los DataFrames originales
+    dfGeoDATA = dfGeoDATA.copy()
     df_abc = df_abc.copy()
+    
+    # Normalizar nombres de departamentos (sin espacios, minúsculas, sin acentos)
+    dfGeoDATA['muni_key'] = dfGeoDATA['NAME_1'].str.replace(' ', '').str.lower().apply(unidecode)
+    
+    # Identificar columnas relevantes (primera: nombre departamento, última: clasificación)
     nombre_col_departamento = df_abc.columns[0]
     nombre_col_clasificacion = df_abc.columns[-1]
+    
+    # Normalizar nombres en los datos ABC para hacer match con las geometrías
     df_abc['muni_key'] = df_abc[nombre_col_departamento].str.replace(' ', '').str.lower().apply(unidecode)
 
-    # Hacer merge con todos los departamentos
-    gdf_merge = dfGeoDATA.merge(df_abc[['muni_key', nombre_col_clasificacion]], on='muni_key', how='left')
+    # =========================================================================
+    # 2. Unión de datos geográficos con clasificación ABC
+    # =========================================================================
+    # Realizar merge manteniendo todos los departamentos (left join)
+    gdf_merge = dfGeoDATA.merge(
+        df_abc[['muni_key', nombre_col_clasificacion]], 
+        on='muni_key', 
+        how='left'
+    )
 
-    # Rellenar departamentos sin datos con "Sin Clasificar"
+    # Asignar "Sin Clasificar" a departamentos sin datos
     gdf_merge[nombre_col_clasificacion] = gdf_merge[nombre_col_clasificacion].fillna("Sin Clasificar")
 
-    # Definir colores fijos
+    # =========================================================================
+    # 3. Configuración de estilo visual
+    # =========================================================================
+    # Paleta de colores fija para las categorías ABC
     color_discrete_map = {
-        "A": "#1f77b4",           # Azul fuerte
-        "B": "#17becf",           # Celeste
-        "C": "#d62728",           # Rojo
-        "Sin Clasificar": "#fbfbfb"  # Gris claro
+        "A": "#1f77b4",           # Azul fuerte para categoría A
+        "B": "#17becf",           # Celeste para categoría B
+        "C": "#d62728",           # Rojo para categoría C
+        "Sin Clasificar": "#fbfbfb"  # Gris claro para no clasificados
     }
 
-    # Definir orden para que aparezcan de forma consistente
+    # Orden definido para consistencia en la leyenda
     category_order = ["A", "B", "C", "Sin Clasificar"]
 
-    # Crear mapa coroplético
+    # =========================================================================
+    # 4. Creación del mapa coroplético
+    # =========================================================================
     fig_map = px.choropleth(
         gdf_merge,
         geojson=gdf_merge.geometry,
         locations=gdf_merge.index,
         color=nombre_col_clasificacion,
-        hover_name="NAME_1",
+        hover_name="NAME_1",  # Mostrar nombre original en tooltips
         category_orders={nombre_col_clasificacion: category_order},
         color_discrete_map=color_discrete_map,
-        title="Clasificación ABC por Departamento"
+        title="<b>Clasificación ABC por Departamento</b>",
+        labels={nombre_col_clasificacion: "Clasificación ABC"}
     )
 
-    # Configuración visual
+    # =========================================================================
+    # 5. Configuración del mapa base
+    # =========================================================================
     fig_map.update_geos(
-        fitbounds="locations",
-        visible=False,
-        projection_scale=5,
-        center={
+        fitbounds="locations",  # Ajustar zoom a la extensión de los departamentos
+        visible=False,         # Ocultar fondo del mapa base
+        projection_scale=5,    # Nivel de zoom inicial
+        center={              # Centrar en el punto medio de los departamentos
             "lat": gdf_merge.geometry.centroid.y.mean(),
             "lon": gdf_merge.geometry.centroid.x.mean()
         },
-        showcountries=False,
-        showcoastlines=False,
-        showland=False
+        showcountries=False,   # Ocultar fronteras de países
+        showcoastlines=False,  # Ocultar líneas costeras
+        showland=False         # Ocultar relleno de tierra
     )
 
+    # =========================================================================
+    # 6. Configuración del layout y estilo
+    # =========================================================================
     fig_map.update_layout(
-        title_x=0.0,
-        margin={"r": 10, "t": 60, "l": 10, "b": 10},
-        height=700,
-        width=900,
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        legend_title_text="Clasificación ABC"
+        title_x=0.0,  # Alinear título a la izquierda
+        margin={"r": 10, "t": 60, "l": 10, "b": 10},  # Márgenes ajustados
+        height=700,   # Altura fija del mapa
+        width=900,    # Ancho fijo del mapa
+        paper_bgcolor='rgba(0,0,0,0)',  # Fondo transparente
+        plot_bgcolor='rgba(0,0,0,0)',   # Área de gráfico transparente
+        legend_title_text="<b>Clasificación</b>",  # Título de leyenda en negrita
+        legend=dict(
+            title_font_size=12,
+            font=dict(size=11),
+            bgcolor='rgba(255,255,255,0.7)'  # Fondo semitransparente para legibilidad
+        )
     )
 
     return fig_map
 
 def plot_map_abc_muni(df_abc, dfGeoDATA):
-    # Preparar claves de unión
+    """
+    Genera un mapa coroplético interactivo mostrando la clasificación ABC por municipio.
+    
+    Esta función toma datos de clasificación ABC y geometrías de municipios para crear
+    un mapa visual que muestra:
+    - Municipios clasificados como A, B o C
+    - Municipios sin clasificar
+    - Incluye tooltips interactivos con el nombre del municipio
+    
+    Args:
+        df_abc (pd.DataFrame): DataFrame con la clasificación ABC que debe contener:
+            - Primera columna: Nombre del municipio
+            - Última columna: Clasificación ABC (valores 'A', 'B' o 'C')
+            
+        dfGeoDATA (gpd.GeoDataFrame): GeoDataFrame con geometrías de municipios que debe contener:
+            - 'NAME_2': Nombre del municipio
+            - 'geometry': Geometrías para el mapeo
+    
+    Returns:
+        plotly.graph_objects.Figure: Mapa coroplético interactivo con la clasificación ABC
+    
+    Example:
+        >>> # Cargar datos de clasificación ABC y geometrías
+        >>> df_abc = pd.read_csv('clasificacion_abc.csv')
+        >>> df_geodata = gpd.read_file('municipios.geojson')
+        >>>
+        >>> # Generar y mostrar el mapa
+        >>> fig = plot_map_abc_muni(df_abc, df_geodata)
+        >>> fig.show()
+    
+    Notes:
+        - Los municipios sin clasificación se muestran en gris claro
+        - El mapa se centra automáticamente en los municipios disponibles
+        - La paleta de colores usa:
+          * Azul (#1f77b4) para categoría A
+          * Celeste (#17becf) para categoría B
+          * Rojo (#d62728) para categoría C
+          * Gris claro (#fbfbfb) para no clasificados
+    """
+    
+    # =========================================================================
+    # 1. Preparación de datos: normalización de nombres para unión
+    # =========================================================================
+    # Crear copias para evitar modificar los DataFrames originales
     dfGeoDATA = dfGeoDATA.copy()
-    dfGeoDATA['muni_key'] = dfGeoDATA['NAME_2'].str.replace(' ', '').str.lower().apply(unidecode)
-
     df_abc = df_abc.copy()
+    
+    # Normalizar nombres de municipios (sin espacios, minúsculas, sin acentos)
+    dfGeoDATA['muni_key'] = dfGeoDATA['NAME_2'].str.replace(' ', '').str.lower().apply(unidecode)
+    
+    # Identificar columnas relevantes en df_abc (primera columna: municipio, última: clasificación)
     nombre_col_departamento = df_abc.columns[0]
     nombre_col_clasificacion = df_abc.columns[-1]
+    
+    # Normalizar nombres en df_abc para hacer match con dfGeoDATA
     df_abc['muni_key'] = df_abc[nombre_col_departamento].str.replace(' ', '').str.lower().apply(unidecode)
 
-    # Hacer merge con todos los departamentos
-    gdf_merge = dfGeoDATA.merge(df_abc[['muni_key', nombre_col_clasificacion]], on='muni_key', how='left')
+    # =========================================================================
+    # 2. Unión de datos geográficos con clasificación ABC
+    # =========================================================================
+    # Hacer merge manteniendo todos los municipios (left join)
+    gdf_merge = dfGeoDATA.merge(
+        df_abc[['muni_key', nombre_col_clasificacion]], 
+        on='muni_key', 
+        how='left'
+    )
 
-    # Rellenar departamentos sin datos con "Sin Clasificar"
+    # Rellenar municipios sin clasificación
     gdf_merge[nombre_col_clasificacion] = gdf_merge[nombre_col_clasificacion].fillna("Sin Clasificar")
 
-    # Definir colores fijos
+    # =========================================================================
+    # 3. Configuración de visualización
+    # =========================================================================
+    # Paleta de colores fija para las categorías
     color_discrete_map = {
-        "A": "#1f77b4",           # Azul fuerte
-        "B": "#17becf",           # Celeste
-        "C": "#d62728",           # Rojo
-        "Sin Clasificar": "#fbfbfb"  # Gris claro
+        "A": "#1f77b4",           # Azul fuerte para categoría A
+        "B": "#17becf",           # Celeste para categoría B
+        "C": "#d62728",           # Rojo para categoría C
+        "Sin Clasificar": "#fbfbfb"  # Gris claro para no clasificados
     }
 
-    # Definir orden para que aparezcan de forma consistente
+    # Orden de categorías para consistencia en la leyenda
     category_order = ["A", "B", "C", "Sin Clasificar"]
 
-    # Crear mapa coroplético
+    # =========================================================================
+    # 4. Creación del mapa coroplético
+    # =========================================================================
     fig_map = px.choropleth(
         gdf_merge,
         geojson=gdf_merge.geometry,
         locations=gdf_merge.index,
         color=nombre_col_clasificacion,
-        hover_name="NAME_2",
+        hover_name="NAME_2",  # Mostrar nombre original en tooltips
         category_orders={nombre_col_clasificacion: category_order},
         color_discrete_map=color_discrete_map,
-        title="Clasificación ABC por Municipio"
+        title="<b>Clasificación ABC por Municipio</b>",
+        labels={nombre_col_clasificacion: "Clasificación ABC"}
     )
 
-    # Configuración visual
+    # =========================================================================
+    # 5. Configuración del mapa base
+    # =========================================================================
     fig_map.update_geos(
-        fitbounds="locations",
-        visible=False,
-        projection_scale=5,
-        center={
+        fitbounds="locations",  # Ajustar zoom a los municipios disponibles
+        visible=False,          # Ocultar fondo del mapa
+        projection_scale=5,     # Nivel de zoom inicial
+        center={               # Centrar en el punto medio de los municipios
             "lat": gdf_merge.geometry.centroid.y.mean(),
             "lon": gdf_merge.geometry.centroid.x.mean()
         },
-        showcountries=False,
-        showcoastlines=False,
-        showland=False
+        showcountries=False,    # Ocultar fronteras de países
+        showcoastlines=False,   # Ocultar líneas costeras
+        showland=False          # Ocultar relleno de tierra
     )
 
+    # =========================================================================
+    # 6. Configuración del layout
+    # =========================================================================
     fig_map.update_layout(
-        title_x=0.0,
-        margin={"r": 10, "t": 60, "l": 10, "b": 10},
-        height=700,
-        width=900,
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        legend_title_text="Clasificación ABC"
+        title_x=0.0,  # Alinear título a la izquierda
+        margin={"r": 10, "t": 60, "l": 10, "b": 10},  # Márgenes ajustados
+        height=700,   # Altura fija
+        width=900,    # Ancho fijo
+        paper_bgcolor='rgba(0,0,0,0)',  # Fondo transparente
+        plot_bgcolor='rgba(0,0,0,0)',   # Área de gráfico transparente
+        legend_title_text="<b>Clasificación</b>",  # Título de leyenda
+        legend=dict(
+            title_font_size=12,
+            font=dict(size=11),
+            bgcolor='rgba(255,255,255,0.7)'  # Fondo semitransparente para leyenda
+        )
     )
 
     return fig_map
 
-
-
 def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=None, anio_fin=None, mes_fin=None, Inflacion_Choice=None):
-    # Normalizar claves de departamento
+    """
+    Genera un mapa coroplético interactivo de precios por departamento y una tabla de resultados.
+    
+    Esta función procesa datos de ventas y geográficos para visualizar:
+    - Precios promedio (geométricos) por departamento
+    - Desviaciones estándar de precios
+    - Opcionalmente, precios corregidos por inflación
+    - Incluye un panel lateral con información detallada
+    
+    Args:
+        df_ventas (pd.DataFrame): DataFrame con datos de ventas que debe contener:
+            - 'Region Oferente': Nombre del departamento
+            - 'Precio unitario': Precio original
+            - 'Cantidad Ofertada': Cantidad de unidades
+            - 'Anio Publicacion': Año de publicación
+            - 'Mes Publicacion': Mes de publicación
+            
+        dfGeoDATA (gpd.GeoDataFrame): GeoDataFrame con geometrías de departamentos que debe contener:
+            - 'NAME_1': Nombre del departamento
+            - 'geometry': Geometrías para el mapeo
+            
+        Inflacion (bool, optional): Si es True, aplica corrección por inflación. Default: False
+        
+        dfInflacion (pd.DataFrame, optional): DataFrame con datos de inflación. Requerido si Inflacion=True.
+            Debe contener columnas para años, meses, regiones y tasas de inflación.
+            
+        anio_fin (int, optional): Año de referencia para corrección. Requerido si Inflacion=True.
+        
+        mes_fin (int, optional): Mes de referencia para corrección. Requerido si Inflacion=True.
+        
+        Inflacion_Choice (str, optional): Método de corrección ('Mensual', 'Acumulada', etc.). 
+            Requerido si Inflacion=True.
+    
+    Returns:
+        tuple: Contiene dos elementos:
+            - fig_map (plotly.graph_objects.Figure): Mapa coroplético interactivo
+            - df_resultados (pd.DataFrame): Tabla con precios y desviaciones por departamento
+    
+    Example:
+        >>> # Sin corrección por inflación
+        >>> mapa, resultados = plot_map_departamentos(df_ventas, df_geodata)
+        >>>
+        >>> # Con corrección por inflación
+        >>> mapa_corr, resultados_corr = plot_map_departamentos(
+        ...     df_ventas, 
+        ...     df_geodata,
+        ...     Inflacion=True,
+        ...     dfInflacion=df_inflacion,
+        ...     anio_fin=2023,
+        ...     mes_fin=12,
+        ...     Inflacion_Choice='Mensual'
+        ... )
+    
+    Notes:
+        - Los precios promedios se calculan usando la media geométrica ponderada por cantidad
+        - Las desviaciones estándar consideran la expansión por cantidad ofertada
+        - El mapa muestra tooltips con información detallada al pasar el cursor
+        - El panel lateral muestra comparación entre precios originales y corregidos (si aplica)
+    """
+    
+    # =========================================================================
+    # 1. Normalización de nombres de departamentos
+    # =========================================================================
+    # Crear claves normalizadas (sin espacios, minúsculas, sin acentos) para unir datos
     dfGeoDATA['muni_key'] = dfGeoDATA['NAME_1'].str.replace(' ', '').str.lower().apply(unidecode)
     df_ventas['muni_key'] = df_ventas['Region Oferente'].str.replace(' ', '').str.lower().apply(unidecode)
 
-    # Aplicar corrección por inflación a cada registro si se especifica
+    # =========================================================================
+    # 2. Corrección por inflación (si se especifica)
+    # =========================================================================
     if all([Inflacion is True, dfInflacion is not None, anio_fin is not None, mes_fin is not None, Inflacion_Choice is not None]):
+        # Aplicar corrección a cada registro usando la función fix_price_inflacion_mensual
         df_ventas['Precio_corregido'] = df_ventas.apply(
             lambda row: fix_price_inflacion_mensual(
                 dfInflacion=dfInflacion,
@@ -528,10 +819,14 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
             axis=1
         )
     else:
+        # Si no se aplica corrección, usar precios originales
         df_ventas['Precio_corregido'] = df_ventas['Precio unitario']
 
-    # Funciones para calcular estadísticas expandidas
+    # =========================================================================
+    # 3. Funciones auxiliares para cálculo de estadísticas expandidas
+    # =========================================================================
     def expanded_geometric_mean(group, price_col):
+        """Calcula la media geométrica expandiendo los datos según cantidad ofertada."""
         try:
             expanded_prices = group.loc[group.index.repeat(group['Cantidad Ofertada'])][price_col]
             return gmean(expanded_prices)
@@ -539,43 +834,53 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
             return np.nan
     
     def expanded_stdv(group, price_col):
+        """Calcula la desviación estándar expandiendo los datos según cantidad ofertada."""
         try:
             expanded_prices = group.loc[group.index.repeat(group['Cantidad Ofertada'])][price_col]
             return expanded_prices.std()
         except:
             return np.nan
 
-    # Agrupación y cálculo de estadísticas para precios originales
+    # =========================================================================
+    # 4. Cálculo de estadísticas por departamento
+    # =========================================================================
+    # Precios originales
     ventas_muni = df_ventas.groupby('muni_key').apply(lambda x: expanded_geometric_mean(x, 'Precio unitario')).reset_index()
     stdv_ventas_muni = df_ventas.groupby('muni_key').apply(lambda x: expanded_stdv(x, 'Precio unitario')).reset_index()
     ventas_muni.columns = ['muni_key', 'Precio_geo_mean']
     stdv_ventas_muni.columns = ['muni_key', 'Stdv_Precio']
 
-    # Agrupación y cálculo de estadísticas para precios corregidos
+    # Precios corregidos (si aplica)
     ventas_muni_corr = df_ventas.groupby('muni_key').apply(lambda x: expanded_geometric_mean(x, 'Precio_corregido')).reset_index()
     stdv_ventas_muni_corr = df_ventas.groupby('muni_key').apply(lambda x: expanded_stdv(x, 'Precio_corregido')).reset_index()
     ventas_muni_corr.columns = ['muni_key', 'Precio_corregido_mean']
     stdv_ventas_muni_corr.columns = ['muni_key', 'Stdv_Precio_corr']
 
-    # Combinar todos los datos
+    # =========================================================================
+    # 5. Combinación de datos geográficos y estadísticas
+    # =========================================================================
     gdf_merge = dfGeoDATA.merge(ventas_muni, on='muni_key', how='left')
     gdf_merge = gdf_merge.merge(stdv_ventas_muni, on='muni_key', how='left')
     gdf_merge = gdf_merge.merge(ventas_muni_corr, on='muni_key', how='left')
     gdf_merge = gdf_merge.merge(stdv_ventas_muni_corr, on='muni_key', how='left')
 
-    # Rellenar valores NaN
+    # Rellenar valores NaN con 0 para visualización
     gdf_merge['precio_promedio'] = gdf_merge['Precio_geo_mean'].fillna(0)
     gdf_merge['precio_corregido'] = gdf_merge['Precio_corregido_mean'].fillna(0)
     gdf_merge['desviacion_estandar'] = gdf_merge['Stdv_Precio'].fillna(0)
     gdf_merge['desviacion_estandar_corr'] = gdf_merge['Stdv_Precio_corr'].fillna(0)
 
-    # Crear DataFrame para resultados
+    # =========================================================================
+    # 6. Preparación de tabla de resultados
+    # =========================================================================
     df_resultados = gdf_merge[['NAME_1', 'precio_promedio', 'desviacion_estandar', 'precio_corregido', 'desviacion_estandar_corr']].copy()
     df_resultados.columns = ['Departamento', 'Precio Promedio (Q)', 'Desv. Estándar', 'Precio Corregido (Q)', 'Desv. Estándar Corr.']
-    df_resultados = df_resultados[df_resultados['Precio Promedio (Q)'] > 0]
+    df_resultados = df_resultados[df_resultados['Precio Promedio (Q)'] > 0]  # Filtrar departamentos con datos
     df_resultados = df_resultados.sort_values('Precio Promedio (Q)', ascending=False).reset_index(drop=True)
 
-    # Mapa coroplético (mostrar precios originales)
+    # =========================================================================
+    # 7. Creación del mapa coroplético
+    # =========================================================================
     fig_map = px.choropleth(
         gdf_merge,
         geojson=gdf_merge.geometry,
@@ -606,7 +911,7 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
         bgcolor='rgba(0,0,0,0)'
     )
 
-    # Título dinámico
+    # Título dinámico según parámetros
     title = "Precio Promedio por Departamento"
     if Inflacion_Choice:
         title += f" (Corregido a {mes_fin}/{anio_fin} - {Inflacion_Choice})"
@@ -627,10 +932,13 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
         }
     )
 
-    # Panel lateral con ambos precios y desviaciones
+    # =========================================================================
+    # 8. Panel lateral con información detallada
+    # =========================================================================
     df_final = df_resultados.sort_values('Precio Promedio (Q)', ascending=False)
     
     if Inflacion:
+        # Formato con precios originales y corregidos
         table_text = "<br>".join(
             f"<b>{row['Departamento']}</b>:<br>"
             f"• <u>Original</u>: Q{row['Precio Promedio (Q)']:.2f} ± {row['Desv. Estándar']:.2f}<br>"
@@ -638,6 +946,7 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
             for _, row in df_final.iterrows()
         )
     else:
+        # Formato solo con precios originales
         table_text = "<br>".join(
             f"<b>{row['Departamento']}</b>:<br>"
             f"•  Q{row['Precio Promedio (Q)']:.2f} ± {row['Desv. Estándar']:.2f}"
@@ -658,8 +967,6 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
     )
 
     return fig_map, df_resultados
-
-
 
 def plot_map_unidades_departamentos(df_ventas, dfGeoDATA):
     # Normalizar claves de departamento
