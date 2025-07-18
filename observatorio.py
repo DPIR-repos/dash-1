@@ -851,8 +851,8 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
     stdv_ventas_muni.columns = ['muni_key', 'Stdv_Precio']
 
     # Precios corregidos (si aplica)
-    ventas_muni_corr = df_ventas.groupby('muni_key').apply(lambda x: expanded_geometric_mean(x, 'Precio_corregido')).reset_index()
-    stdv_ventas_muni_corr = df_ventas.groupby('muni_key').apply(lambda x: expanded_stdv(x, 'Precio_corregido')).reset_index()
+    ventas_muni_corr = df_ventas.groupby('muni_key', group_keys=False).apply(lambda x: expanded_geometric_mean(x, 'Precio_corregido')).reset_index()
+    stdv_ventas_muni_corr = df_ventas.groupby('muni_key', group_keys=False).apply(lambda x: expanded_stdv(x, 'Precio_corregido')).reset_index()
     ventas_muni_corr.columns = ['muni_key', 'Precio_corregido_mean']
     stdv_ventas_muni_corr.columns = ['muni_key', 'Stdv_Precio_corr']
 
@@ -1075,9 +1075,9 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
             lambda x: f"{meses_dic[x['Mes Publicacion']]}-{x['Anio Publicacion']}", 
             axis=1
         )
-        grupos = df.groupby(['Mes Publicacion', 'Anio Publicacion', 'Mes_Año'])
+        grupos = df.groupby(['Mes Publicacion', 'Anio Publicacion', 'Mes_Año'], group_keys=False)
     else:
-        grupos = df.groupby('Mes Publicacion')
+        grupos = df.groupby('Mes Publicacion', group_keys=False)
     
     # Calcular estadísticas para cada grupo
     precios_promedio = []
@@ -2179,7 +2179,7 @@ def plot_tiempo_adjudicacion(df_filtrado, orden_variedades=None):
     df['Dias_Adjudicacion'] = (df['Fecha_Adjudicacion'] - df['Fecha_Publicacion']).dt.days
 
     # Filtrar fechas válidas
-    df = df[df['Dias_Adjudicacion'].notna() & (df['Dias_Adjudicacion'] >= 0)]
+    df = df[df['Dias_Adjudicacion'].notna() & (df['Dias_Adjudicacion'] >= 0)].copy()
 
     # Agrupar por mes y variedad
     df['Mes_Anio'] = df['Fecha_Publicacion'].dt.to_period('M').astype(str)
