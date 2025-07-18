@@ -567,10 +567,10 @@ def plot_map_abc_dep(df_abc, dfGeoDATA):
         fitbounds="locations",  # Ajustar zoom a la extensión de los departamentos
         visible=False,         # Ocultar fondo del mapa base
         projection_scale=5,    # Nivel de zoom inicial
-        center={              # Centrar en el punto medio de los departamentos
-            "lat": gdf_merge.geometry.centroid.y.mean(),
-            "lon": gdf_merge.geometry.centroid.x.mean()
-        },
+        #center={              # Centrar en el punto medio de los departamentos
+        #    "lat": gdf_merge.geometry.centroid.y.mean(),
+        #    "lon": gdf_merge.geometry.centroid.x.mean()
+        #},
         showcountries=False,   # Ocultar fronteras de países
         showcoastlines=False,  # Ocultar líneas costeras
         showland=False         # Ocultar relleno de tierra
@@ -703,10 +703,10 @@ def plot_map_abc_muni(df_abc, dfGeoDATA):
         fitbounds="locations",  # Ajustar zoom a los municipios disponibles
         visible=False,          # Ocultar fondo del mapa
         projection_scale=5,     # Nivel de zoom inicial
-        center={               # Centrar en el punto medio de los municipios
-            "lat": gdf_merge.geometry.centroid.y.mean(),
-            "lon": gdf_merge.geometry.centroid.x.mean()
-        },
+        #center={               # Centrar en el punto medio de los municipios
+        #    "lat": gdf_merge.geometry.centroid.y.mean(),
+        #    "lon": gdf_merge.geometry.centroid.x.mean()
+        #},
         showcountries=False,    # Ocultar fronteras de países
         showcoastlines=False,   # Ocultar líneas costeras
         showland=False          # Ocultar relleno de tierra
