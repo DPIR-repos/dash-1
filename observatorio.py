@@ -2979,14 +2979,9 @@ if len(year)>=1:
 #   ANALISIS RFM
 #==============================                                
         with tab3:
-            st.markdown("## Análisis RFM")
-            st.tooltip("""
-            El **análisis RFM** es una técnica poderosa para evaluar el compromiso y valor de cualquier entidad o interacción, 
-            ya sean clientes, instituciones o tipos de productos. Se basa en tres dimensiones clave: 
-            - **Recencia (R)**: cuán recientemente ocurrió la interacción.
-            - **Frecuencia (F)**: con qué asiduidad se repite.
-            - **Valor Monetario (M)**: el valor económico asociado.
-            """)
+             st.markdown("## Análisis RFM", help="El **análisis RFM** es una técnica poderosa para evaluar el compromiso y valor de cualquier entidad o interacción, 
+                        ya sean clientes, instituciones o tipos de productos. Se basa en tres dimensiones clave: **Recencia (R)**, que mide cuán recientemente ocurrió la interacción;
+                        **Frecuencia (F)**, que evalúa con qué asiduidad se repite; **Valor Monetario (M)**, que cuantifica el valor económico." )
 
 
 
