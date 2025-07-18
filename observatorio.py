@@ -2780,8 +2780,8 @@ if len(year)>=1:
             with st.expander(f"**Base de datos para el código: {insumoCode}**"):
                 change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
                         'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
-                df_filtrado=df_filtrado.rename(columns=change_columns)
-                st.dataframe(df_filtrado,hide_index=True)    
+                df_filtrado_2=df_filtrado.rename(columns=change_columns).copy()
+                st.dataframe(df_filtrado_2,hide_index=True)    
                 
             with col2Info:
                 # Llamar a la función
