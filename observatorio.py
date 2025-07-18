@@ -3313,7 +3313,7 @@ if len(year)>=1:
 else:
 # Mensaje de bienvenida
     st.markdown("""
-    
+    <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin-top: 30px;">
     **Bienvenido al Sistema de Monitoreo de Precios Estatales**
 
     Esta herramienta, desarrollada por la Dirección de Precios e Índices de Referencia (DPIR), 
@@ -3321,7 +3321,7 @@ else:
     que se visualizan aquí han sido extraídos directamente de Guatecompras, y la asignación del 
     código de insumo se ha realizado mediante el modelo all-MiniLM-L6-v2-similarity-es. 
     **Este sistema debe considerarse un complemento de apoyo para el analista de precios, 
-    facilitando la identificación de tendencias y comparaciones en el mercado estatal.**
+    facilitando la identificación de tendencias y comparaciones en el mercado estatal.** <\div>
 
     ---
 
