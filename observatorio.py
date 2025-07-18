@@ -2729,7 +2729,7 @@ if len(year)>=1:
             "ℹ **Inf. General**", 
             "💰 **Análisis Precios**", 
             "🔄 Análisis RFM",
-            "**Análisis** 🅰️🅱️©️"
+            " **Análisis** 🅰️🅱️©️"
         ])
                 
         df_filtrado = dfY[dfY["Codigo Insumo"].isin([insumoCode])].copy() #filtrado por codigo de insumo    
