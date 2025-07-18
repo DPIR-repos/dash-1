@@ -846,7 +846,7 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
     # =========================================================================
     # Precios originales
     ventas_muni = df_ventas.groupby('muni_key', group_keys=False).apply(lambda x: expanded_geometric_mean(x, 'Precio unitario')).reset_index()
-    stdv_ventas_muni = df_ventas.groupby('muni_key').apply(lambda x: expanded_stdv(x, 'Precio unitario')).reset_index()
+    stdv_ventas_muni = df_ventas.groupby('muni_key', group_keys=False).apply(lambda x: expanded_stdv(x, 'Precio unitario')).reset_index()
     ventas_muni.columns = ['muni_key', 'Precio_geo_mean']
     stdv_ventas_muni.columns = ['muni_key', 'Stdv_Precio']
 
@@ -875,7 +875,7 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
     # =========================================================================
     df_resultados = gdf_merge[['NAME_1', 'precio_promedio', 'desviacion_estandar', 'precio_corregido', 'desviacion_estandar_corr']].copy()
     df_resultados.columns = ['Departamento', 'Precio Promedio (Q)', 'Desv. Estándar', 'Precio Corregido (Q)', 'Desv. Estándar Corr.']
-    df_resultados = df_resultados[df_resultados['Precio Promedio (Q)'] > 0]  # Filtrar departamentos con datos
+    df_resultados = df_resultados[df_resultados['Precio Promedio (Q)'] > 0].copy()  # Filtrar departamentos con datos
     df_resultados = df_resultados.sort_values('Precio Promedio (Q)', ascending=False).reset_index(drop=True)
 
     # =========================================================================
