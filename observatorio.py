@@ -2820,14 +2820,14 @@ if len(year)>=1:
                     df_v = df_filtrado[df_filtrado['Unidad de Medida'] == v].copy() #filtrado por codigo de insumo y por variedad
                     if inflacion_choice is not None:
                         #----CORRECCION-POR INFLACION-----
-                        anio_max=df_v['Anio Publicacion'].max() #Obtengo el maximo año que hay en la data
-                        df_v_anio=df_v[df_v['Anio Publicacion']==anio_max] #filtro con respecto al año max
+                        anio_max=df_v['Anio Publicacion'].min() #Obtengo el maximo año que hay en la data
+                        df_v_anio=df_v[df_v['Anio Publicacion']==anio_max].copy() #filtro con respecto al año max
                         month_max=df_v_anio['Mes Publicacion'].max() #Obtengo el mes maximo que hay en la variedad
                         #el año maximo es el año minimo el cual se debe corregir por inflacion siempre que este año sea menor al actual
                         #el mes maximo-1 es el mes minimo al que se debe corregir la inflacion
                         #obteniendo el año y mes maximos de la inflacion que se tiene en el dataframe inflacion_year
                         #Obtener el último año y mes disponible en inflacion_year
-                        inflaY_available = int(inflacion_year['Anio'].min()) # Último año disponible
+                        inflaY_available = int(inflacion_year['Anio'].max()) # Último año disponible
                         month_availableName = inflacion_year.loc[inflacion_year['Anio']==inflaY_available, 'Mes'].iloc[-1] #el ultimo mes disponible en la lista
                         month_available=meses_dicReverse[month_availableName] #numero del mes disponible en la lista
 
