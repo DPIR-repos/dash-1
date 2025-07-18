@@ -1771,14 +1771,26 @@ def plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades):
 
 def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
     """
-    Crea un gráfico de barras verticales con el número de NOGs únicos por variedad.
+    Crea un gráfico de barras con el número de NOGs únicos por variedad.
+    
+    Esta función toma un DataFrame filtrado y genera una visualización del conteo de
+    Números de Orden de Grano (NOGs) distintos para cada variedad, ordenados según
+    la lista proporcionada.
     
     Args:
-        df_filtrado (pd.DataFrame): DataFrame filtrado por código de insumo.
-        orden_variedades (list): Orden específico para mostrar las variedades.
-        
+        df_filtrado (pd.DataFrame): DataFrame filtrado que contiene los datos de NOGs.
+            Debe contener las columnas 'Unidad de Medida' y 'NOG'.
+        orden_variedades (list): Lista con el orden específico en que deben mostrarse
+            las variedades en el gráfico.
+            
     Returns:
-        plotly.graph_objects.Figure: Gráfico de barras interactivo.
+        plotly.graph_objects.Figure: Objeto de figura de Plotly con el gráfico de
+        barras horizontales interactivo.
+        
+    Example:
+        >>> orden = ['Variedad A', 'Variedad B', 'Variedad C']
+        >>> fig = plot_NOGs_por_variedad(df_filtrado, orden)
+        >>> fig.show()
     """
     # Contar NOGs únicos por variedad (usando nunique para contar valores distintos)
     df_nogs = (
@@ -1789,12 +1801,12 @@ def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
         .reset_index()
     )
     
-    # Crear el gráfico de barras verticales
+    # Crear el gráfico de barras HORIZONTALES
     fig = px.bar(
         df_nogs,
-        x='Unidad de Medida',
-        y='NOG',
-        orientation='v',  # Barras verticales (por defecto)
+        y='Unidad de Medida',  # Eje Y para variedades (barras horizontales)
+        x='NOG',               # Eje X para conteo
+        orientation='h',        # Barras horizontales
         title='<b>Número de NOGs distintos por variedad</b>',
         labels={'Unidad de Medida': 'Variedad', 'NOG': 'Número de NOGs'},
         category_orders={'Unidad de Medida': orden_variedades},
@@ -1803,26 +1815,29 @@ def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
         text_auto=True
     )
     
-    # Personalizar diseño
+    # Personalizar diseño del gráfico horizontal
     fig.update_layout(
-        xaxis_title=None,
-        yaxis_title='Número de NOGs distintos',
-        showlegend=False,
-        plot_bgcolor='rgba(0,0,0,0)',
+        yaxis_title=None,        # Eliminar título del eje Y (las etiquetas son claras)
+        xaxis_title='Número de NOGs distintos',
+        showlegend=False,        # Ocultar leyenda ya que las barras están etiquetadas
+        plot_bgcolor='rgba(0,0,0,0)',  # Fondo transparente
         margin=dict(l=20, r=20, t=50, b=20),
-        height=500,
-        width=800  # Más ancho para mejor visualización de etiquetas
+        height=500,              # Altura fija
+        width=800                # Ancho fijo para mejor visualización
     )
     
     # Formatear tooltips y texto de las barras
     fig.update_traces(
-        hovertemplate='<b>%{x}</b><br>NOGs distintos: %{y}',
-        texttemplate='%{y}',
+        hovertemplate='<b>%{y}</b><br>NOGs distintos: %{x}',
+        texttemplate='%{x}',
         textposition='outside'
     )
     
-    # Rotar etiquetas del eje X si son largas
-    fig.update_xaxes(tickangle=45)
+    # Ajustar márgenes y espaciado para etiquetas largas
+    fig.update_yaxes(
+        automargin=True,         # Ajustar automáticamente el margen para etiquetas
+        title_standoff=15        # Espacio entre ejes y título
+    )
     
     return fig
 
