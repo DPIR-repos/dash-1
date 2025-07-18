@@ -1401,7 +1401,8 @@ def plot_precio_vs_unidades_inflacion(df, Inflacion=False, dfInflacion=None, ani
         se_slope = np.sqrt(cov_matrix[1, 1])
         
         # Valor t para intervalo de confianza
-        t_val = sps.t.ppf(1 - 0.05/2, df=n - p)
+        # Por esta (valor t para 68% de confianza):
+        t_val = sps.t.ppf(1 - (1 - 0.68)/2, df=n - p) # al 68% de confianza a 1sigma
         
         # Calcular franja de error
         x_vals = np.linspace(X.min(), X.max(), 100)
@@ -1419,7 +1420,7 @@ def plot_precio_vs_unidades_inflacion(df, Inflacion=False, dfInflacion=None, ani
             fill='toself',
             fillcolor='rgba(255,0,0,0.2)',
             line=dict(color='rgba(255,255,255,0)'),
-            name='Franja de error'
+            name='Franja de error a 1σ'
         ))
         
         fig.update_layout(
