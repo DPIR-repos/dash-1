@@ -3330,7 +3330,7 @@ if len(year)>=1:
 #=================================
 #   Boton de Descarga
 #================================        
- st.sidebar.markdown("---")  # Línea separadora
+    st.sidebar.markdown("---")  # Línea separadora
 
     # Widget para selección de formato
     formato_descarga = st.sidebar.radio(
