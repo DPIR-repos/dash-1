@@ -820,7 +820,7 @@ def plot_map_departamentos(df_ventas, dfGeoDATA, Inflacion=False, dfInflacion=No
         )
     else:
         # Si no se aplica corrección, usar precios originales
-        df_ventas['Precio_corregido'] = df_ventas['Precio unitario']
+        df_ventas['Precio_corregido'] = df_ventas['Precio unitario'].copy()
 
     # =========================================================================
     # 3. Funciones auxiliares para cálculo de estadísticas expandidas
