@@ -3326,6 +3326,10 @@ if len(year)>=1:
                 )
                      
             # --- Selector de formato de descarga ---
+        
+#=================================
+#   Boton de Descarga
+#================================        
         st.sidebar.markdown("---")  # Línea separadora
         formato_descarga = st.sidebar.radio(
             "📤 Descargar info. por código:",
@@ -3339,6 +3343,7 @@ if len(year)>=1:
             change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
                             'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
             df_filtrado_2=df_filtrado.rename(columns=change_columns)
+            
         if formato_descarga == "CSV":
             file_extension = "csv"
             mime_type = "text/csv"
