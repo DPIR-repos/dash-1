@@ -3313,9 +3313,13 @@ if len(year)>=1:
 else:
 # Mensaje de bienvenida
     st.markdown("""
-    Bienvenido al Sistema de Monitoreo de Compras Públicas
+    **Bienvenido al Sistema de Monitoreo de Precios Estatales**
 
-    **Herramienta oficial** de la *Dirección de Precios e Índices de Referencia* para el análisis estratégico de precios en contrataciones estatales.
+Esta herramienta, desarrollada por la Dirección de Precios e Índices de Referencia (DPIR), está diseñada para el análisis estratégico de precios en contrataciones públicas.
+
+Los datos que se visualizan aquí han sido extraídos directamente de Guatecompras, y la asignación del código de insumo se ha realizado mediante el modelo all-MiniLM-L6-v2-similarity-es.
+
+Este sistema debe considerarse un complemento de apoyo para el analista de precios, facilitando la identificación de tendencias y comparaciones en el mercado estatal.
 
     ---
 
