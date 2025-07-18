@@ -3330,47 +3330,64 @@ if len(year)>=1:
 #=================================
 #   Boton de Descarga
 #================================        
-        st.sidebar.markdown("---")  # Línea separadora
-        formato_descarga = st.sidebar.radio(
-            "📤 Descargar info. por código:",
-            options=["CSV", "TXT", "Excel (XLSX)"],
-            index=0,  # Opción predeterminada (CSV)
-            horizontal=True  # Diseño en línea
-        )
+ st.sidebar.markdown("---")  # Línea separadora
 
-        # --- Botón de descarga dinámico ---
-        if df_filtrado is not None:
-            change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
-                            'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
-            df_filtrado_2=df_filtrado.rename(columns=change_columns).copy()
-            
+    # Widget para selección de formato
+    formato_descarga = st.sidebar.radio(
+        "📤 Descargar info. por código:",
+        options=["CSV", "TXT", "Excel (XLSX)"],
+        index=0,
+        horizontal=True,
+        key="formato_descarga"  # Clave única para el widget
+    )
+
+    # Solo mostrar botón si hay datos filtrados
+    if df_filtrado is not None:
+        # Renombrar columnas
+        change_columns = {
+            'Localidad Oferente': 'Municipio Oferente',
+            'Region Oferente': 'Departamento Oferente', 
+            'Localidad Comprador': 'Municipio Comprador',
+            'Region Comprador': 'Departamento Comprador'
+        }
+        df_filtrado_2 = df_filtrado.rename(columns=change_columns).copy()
+        
+        # Preparar datos según formato seleccionado
         if formato_descarga == "CSV":
-            file_extension = "csv"
-            mime_type = "text/csv"
             data = df_filtrado_2.to_csv(index=False).encode('utf-8-sig')
+            mime_type = "text/csv"
+            file_extension = "csv"
         elif formato_descarga == "TXT":
-            file_extension = "txt"
+            data = df_filtrado_2.to_csv(index=False, sep='\t').encode('utf-8-sig')
             mime_type = "text/plain"
-            data = df_filtrado_2.to_csv(index=False, sep='\t').encode('utf-8-sig')  # TXT con tabulador
-        else:  # Excel (XLSX)
-            file_extension = "xlsx"
-            mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            file_extension = "txt"
+        elif formato_descarga == "Excel (XLSX)":
             from io import BytesIO
             output = BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 df_filtrado_2.to_excel(writer, index=False)
+                writer.close()  # Importante para Excel
             data = output.getvalue()
-
-        # Nombre del archivo con año y formato
-        filename = f"datos_filtrados_{year}.{file_extension}"
-
+            mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            file_extension = "xlsx"
+        
+        # Generar nombre de archivo dinámico
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"datos_filtrados_{year}_{timestamp}.{file_extension}"
+        
+        # Botón de descarga con estilo mejorado
         st.sidebar.download_button(
             label=f"⬇️ Descargar como {formato_descarga}",
             data=data,
             file_name=filename,
             mime=mime_type,
-            help=f"Descarga los datos filtrados en formato {formato_descarga}"
-        )            
+            help=f"Descarga los datos filtrados en formato {formato_descarga}",
+            use_container_width=True,  # Mejor ajuste al contenedor
+            key=f"download_{timestamp}"  # Clave única para evitar caché
+        )
+    else:
+        st.sidebar.warning("No hay datos disponibles para descargar")
     #st.write(df_filtrado)
     # Mostramos el DataFrame filtrado
     #st.write(df_filtrado)
