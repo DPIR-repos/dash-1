@@ -3310,8 +3310,60 @@ if len(year)>=1:
         st.markdown("Para obtener el precio estimado de un insumo, **seleccione** en la barra derecha el **código de insumo y variedad de interes**.")            
 
 
-#else:
-#        st.markdown("Para obtener el precio estimado de un insumo, **seleccione** en la barra derecha el **año, código de insumo y variedad de interes**.")
+else:
+# Mensaje de bienvenida
+    st.markdown("""
+    <div style="text-align: center; margin: 30px 0;">
+        <img src="https://www.ine.gob.gt/ine/wp-content/uploads/2017/09/cropped-INE.png" width="200" style="margin-bottom: 20px;">
+    </div>
+
+    ## Bienvenido al Sistema de Monitoreo de Compras Públicas
+
+    **Herramienta oficial** de la *Dirección de Precios e Índices de Referencia* para el análisis estratégico de precios en contrataciones estatales.
+
+    ---
+
+    ### 🔍 ¿Qué puede hacer esta plataforma?
+
+    1. **Analizar** precios unitarios históricos de miles de insumos
+    2. **Comparar** adjudicaciones entre instituciones y regiones
+    3. **Detectar** patrones y anomalías en compras gubernamentales
+    4. **Optimizar** presupuestos con inteligencia de mercado
+
+    ---
+
+    ### 🛠️ ¿Cómo utilizarlo?
+
+    1. **Seleccione el año** de interés en el panel izquierdo
+    2. **Busque un insumo** por código o descripción
+    3. **Explore las variedades** disponibles
+    4. **Active filtros** avanzados según sus necesidades
+    5. **Descargue reportes** en múltiples formatos
+
+    ---
+
+    ### 📊 Principales funcionalidades
+
+    | Módulo | Descripción | Beneficio |
+    |--------|-------------|-----------|
+    | **Análisis ABC** | Clasificación de insumos por impacto económico | Priorización eficiente |
+    | **Evolución temporal** | Series históricas con ajuste por inflación | Tendencias a largo plazo |
+    | **Mapas interactivos** | Comparación geográfica de precios | Identificación de mercados regionales |
+    | **RFM avanzado** | Evaluación multidimensional de proveedores | Mejor selección de contratistas |
+
+    ---
+
+    <div style="background-color: #f0f2f6; padding: 20px; border-radius: 10px; margin-top: 30px;">
+        <h3 style="color: #2c3e50; margin-top: 0;">📌 ¿Primera vez usando el sistema?</h3>
+        <p>Revise nuestra <a href="/documentacion" target="_self">guía técnica</a> o contacte al equipo DPIR:</p>
+        <p>📧 <a href="mailto:dpir@ine.gob.gt">dpir@ine.gob.gt</a> | 📞 (+502) 1234-5678</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; font-size: 0.9em; color: #7f8c8d;">
+        <p>Sistema desarrollado por la <strong>Dirección de Precios e Índices de Referencia</strong></p>
+        <p>Instituto Nacional de Estadística - Guatemala</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Crear dos columnas vacías: una ancha y una angosta
 current_folder = Path(os.getcwd())
