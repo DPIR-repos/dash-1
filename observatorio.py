@@ -3342,7 +3342,7 @@ if len(year)>=1:
         if df_filtrado:
             change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
                             'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
-            df_filtrado_2=df_filtrado.rename(columns=change_columns)
+            df_filtrado_2=df_filtrado.rename(columns=change_columns).copy()
             
         if formato_descarga == "CSV":
             file_extension = "csv"
