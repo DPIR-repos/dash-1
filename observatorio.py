@@ -2776,11 +2776,11 @@ if len(year)>=1:
                 
                     # Mostrar el gráfico
                 st.plotly_chart(fig_NOGs,  use_container_width=True)
-            ####dataframe con la base de datos 
+####dataframe con la base de datos 
             with st.expander(f"**Base de datos para el código: {insumoCode}**"):
                 change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
                         'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
-                df_filtrado=df_filtrado.raname(columns=change_columns)
+                df_filtrado=df_filtrado.rename(columns=change_columns)
                 st.dataframe(df_filtrado,hide_index=True)    
                 
             with col2Info:
@@ -3338,7 +3338,7 @@ if len(year)>=1:
         if df_filtrado:
             change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
                             'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
-            df_filtrado=df_filtrado.raname(columns=change_columns)
+            df_filtrado=df_filtrado.rename(columns=change_columns)
         if formato_descarga == "CSV":
             file_extension = "csv"
             mime_type = "text/csv"
