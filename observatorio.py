@@ -61,6 +61,10 @@ def fix_price_inflacion_mensual(dfInflacion, precio_inicial, anio_inicio, mes_in
         'huehuetenango':7, 'quiche':7, 'peten':8
     }
     
+    
+    fecha_inicio=(anio_fin,mes_fin)
+    fecha_fin=(anio_fin,mes_fin)
+    
     # Si no se especifica corrección por inflación, devolver el precio original
     if Inflacion_Choice is None:
         return precio_inicial
@@ -81,7 +85,8 @@ def fix_price_inflacion_mensual(dfInflacion, precio_inicial, anio_inicio, mes_in
             'IPC'
         ].iloc[0]
 
-        if (anio_fin,mes_fin) => (anio_inicio,mes_fin):
+        
+        if fecha_inicio <= fecha_fin:
             precio_final = precio_inicial * (IPC_fin/IPC_init)
         else:
             precio_final=precio_inicial
@@ -102,7 +107,7 @@ def fix_price_inflacion_mensual(dfInflacion, precio_inicial, anio_inicio, mes_in
             'IPC_R'+str(regiones_gt[unidecode(region.lower())])
         ].iloc[0]
         
-        if (anio_fin,mes_fin) >= (anio_inicio,mes_fin):
+        if fecha_inicio <= fecha_fin:
             precio_final = precio_inicial * (IPC_fin/IPC_init)
         else:
             precio_final=precio_inicial
