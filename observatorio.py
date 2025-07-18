@@ -3332,8 +3332,9 @@ if len(year)>=1:
         )
 
         # --- Botón de descarga dinámico ---
-       df_filtrado=df_filtrado.raname(columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
-                                               'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'})
+        change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
+                        'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
+        df_filtrado=df_filtrado.raname(columns=change_columns)
         if formato_descarga == "CSV":
             file_extension = "csv"
             mime_type = "text/csv"
