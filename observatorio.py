@@ -3321,7 +3321,8 @@ else:
     que se visualizan aquí han sido extraídos directamente de Guatecompras, y la asignación del 
     código de insumo se ha realizado mediante el modelo all-MiniLM-L6-v2-similarity-es. 
     **Este sistema debe considerarse un complemento de apoyo para el analista de precios, 
-    facilitando la identificación de tendencias y comparaciones en el mercado estatal.** <\div>
+    facilitando la identificación de tendencias y comparaciones en el mercado estatal.** 
+    <\div>
 
     ---
 
