@@ -2998,13 +2998,13 @@ if len(year)>=1:
                                 st.plotly_chart(fig_uni,use_container_width=True, key=f"uni_{v}_{idx}" )
                         with col2Sec4:
                             if inflacion_month is None:
-                                geo_fig2=plot_precio_vs_unidades_inflacion(df_v)
-                                if geo_fig2:
-                                    st.plotly_chart(geo_fig2, use_container_width=True, key=f"mapa2_{v}_{idx}" )
+                                corr_fig1, corr_data1, corr_regresion1 =plot_precio_vs_unidades_inflacion(df_v)
+                                if corr_fig1:
+                                    st.plotly_chart(corr_fig1, use_container_width=True, key=f"mapa2_{v}_{idx}" )
                             else:
-                                corr_fig=plot_precio_vs_unidades_inflacion(df_v,True,inflacion_year,anio_fin,mes_fin,inflacion_choice)
-                                if corr_fig:
-                                    st.plotly_chart(corr_fig, use_container_width=True, key=f"corr_infla_{v}_{idx}" )
+                                corr_fig2, corr_data2, corr_regresion2 =plot_precio_vs_unidades_inflacion(df_v,True,inflacion_year,anio_fin,mes_fin,inflacion_choice)
+                                if  corr_fig2:
+                                    st.plotly_chart(corr_fig2, use_container_width=True, key=f"corr_infla_{v}_{idx}" )
             else:
                 st.markdown("Seleccione una variedad para iniciar con el análisis de precios...")
 #=============================
