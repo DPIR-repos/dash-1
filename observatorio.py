@@ -2788,7 +2788,7 @@ if len(year)>=1:
                     # Mostrar el gráfico
                 st.plotly_chart(fig_NOGs,  use_container_width=True)
 ####dataframe con la base de datos 
-            with st.expander(f"**Base de datos para el código: {', '.join(map(str, insumoCode)) if isinstance(insumoCode, list) else insumoCode} - {df_filtrado['Insumo Match'].iloc[0]}**"):
+            with st.expander(f" **Base de datos para el código**: {', '.join(map(str, insumoCode)) if isinstance(insumoCode, list) else insumoCode} - {df_filtrado['Insumo Match'].iloc[0]}"):
                 change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
                         'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
                 df_filtrado_2=df_filtrado.rename(columns=change_columns).copy()
