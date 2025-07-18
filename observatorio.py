@@ -1279,47 +1279,108 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
     
     return fig
 
-
 def plot_precio_vs_unidades_inflacion(df, Inflacion=False, dfInflacion=None, anio_fin=None, mes_fin=None, Inflacion_Choice=None):
+    """
+    Genera un gráfico de dispersión de Precio Unitario vs Unidades Vendidas con ajuste lineal,
+    opcionalmente ajustando precios por inflación y devuelve dos DataFrames con los datos y estadísticas.
+    
+    Parámetros:
+    -----------
+    df : pandas.DataFrame
+        DataFrame con los datos de productos, debe contener las columnas:
+        'Precio unitario', 'Cantidad Ofertada', 'Anio Publicacion', 'Mes Publicacion'
+        
+    Inflacion : bool, opcional (default=False)
+        Si True, ajusta los precios por inflación
+        
+    dfInflacion : pandas.DataFrame, opcional
+        DataFrame con datos de inflación para el ajuste
+        
+    anio_fin : int, opcional
+        Año de referencia para el ajuste de inflación
+        
+    mes_fin : int, opcional
+        Mes de referencia para el ajuste de inflación (1-12)
+        
+    Inflacion_Choice : str, opcional
+        Tipo de ajuste de inflación ('regional' u otro)
+        
+    Retorna:
+    --------
+    tuple (fig, df_datos, df_ajuste)
+        fig : plotly.graph_objects.Figure
+            Figura con el gráfico de dispersión y ajuste lineal
+        df_datos : pandas.DataFrame
+            DataFrame con los datos utilizados en los ejes X e Y
+        df_ajuste : pandas.DataFrame
+            DataFrame con los parámetros y estadísticas del ajuste lineal
+    
+    Ejemplo:
+    --------
+    fig, datos_df, ajuste_df = plot_precio_vs_unidades_inflacion(df, Inflacion=True, 
+                               dfInflacion=df_inflacion, anio_fin=2023, mes_fin=6, 
+                               Inflacion_Choice='nacional')
+    fig.show()
+    display(datos_df.head())
+    display(ajuste_df)
+    """
+    # Crear copia explícita del DataFrame para evitar SettingWithCopyWarning
     df_clean = df[['Precio unitario', 'Cantidad Ofertada', 'Anio Publicacion', 'Mes Publicacion']].copy()
+    
+    # Procesamiento de inflación si está activado
     if Inflacion and dfInflacion is not None and anio_fin is not None and mes_fin is not None and Inflacion_Choice is not None:
         if unidecode(Inflacion_Choice.lower()) == 'regional':
+            # Crear nueva copia explícita para el caso regional
             df_clean = df.copy()
             df_clean['Region Oferente'] = df.get('Region Oferente', None)
             df_clean = df_clean.dropna(subset=['Region Oferente'])
+        
         precios_ajustados = []
         for idx, row in df_clean.iterrows():
-            if unidecode(Inflacion_Choice.lower()) == 'regional':
-                precio_aj = fix_price_inflacion_mensual(
-                    dfInflacion,
-                    row['Precio unitario'],
-                    row['Anio Publicacion'],
-                    row['Mes Publicacion'],
-                    anio_fin,
-                    mes_fin,
-                    Inflacion_Choice,
-                    row['Region Oferente']
-                )
-            else:
-                precio_aj = fix_price_inflacion_mensual(
-                    dfInflacion,
-                    row['Precio unitario'],
-                    row['Anio Publicacion'],
-                    row['Mes Publicacion'],
-                    anio_fin,
-                    mes_fin,
-                    Inflacion_Choice
-                )
-            precios_ajustados.append(precio_aj)
+            try:
+                if unidecode(Inflacion_Choice.lower()) == 'regional':
+                    precio_aj = fix_price_inflacion_mensual(
+                        dfInflacion,
+                        row['Precio unitario'],
+                        row['Anio Publicacion'],
+                        row['Mes Publicacion'],
+                        anio_fin,
+                        mes_fin,
+                        Inflacion_Choice,
+                        row['Region Oferente']
+                    )
+                else:
+                    precio_aj = fix_price_inflacion_mensual(
+                        dfInflacion,
+                        row['Precio unitario'],
+                        row['Anio Publicacion'],
+                        row['Mes Publicacion'],
+                        anio_fin,
+                        mes_fin,
+                        Inflacion_Choice
+                    )
+                precios_ajustados.append(precio_aj)
+            except Exception as e:
+                print(f"Error ajustando inflación para fila {idx}: {str(e)}")
+                precios_ajustados.append(np.nan)
+        
         df_clean['Precio Ajustado'] = precios_ajustados
         df_clean = df_clean.dropna(subset=['Precio Ajustado', 'Cantidad Ofertada'])
         X = df_clean['Precio Ajustado'].values.reshape(-1, 1)
+        x_label = 'Precio Unitario Ajustado'
+        columna_precio = 'Precio Ajustado'
     else:
         df_clean = df_clean.dropna(subset=['Precio unitario', 'Cantidad Ofertada'])
         X = df_clean['Precio unitario'].values.reshape(-1, 1)
+        x_label = 'Precio Unitario'
+        columna_precio = 'Precio unitario'
 
     y = df_clean['Cantidad Ofertada'].values
 
+    # Verificar que tenemos datos suficientes
+    if len(X) < 2:
+        raise ValueError("No hay suficientes datos para realizar el ajuste lineal (mínimo 2 puntos requeridos)")
+    
     # Ajustar modelo regresión lineal
     model = LinearRegression()
     model.fit(X, y)
@@ -1328,22 +1389,38 @@ def plot_precio_vs_unidades_inflacion(df, Inflacion=False, dfInflacion=None, ani
     # Calcular coeficiente de correlación
     corr_coef = np.corrcoef(X.flatten(), y)[0, 1]
 
-    # Cálculo de intervalo de confianza para la regresión lineal
-    # Fórmulas para intervalo predicción: 
-    # https://en.wikipedia.org/wiki/Simple_linear_regression#Confidence_and_prediction_intervals
+    # Calcular errores estándar de los parámetros
     n = len(X)
-    alpha = 0.05
-    t_val = sps.t.ppf(1 - alpha/2, df=n - 2)
-    x_mean = np.mean(X)
-    s_err = np.sqrt(np.sum((y - y_pred) ** 2) / (n - 2))
-
-    # Para cada x calcular margen error
-    margin = t_val * s_err * np.sqrt(
-        1/n + (X.flatten() - x_mean) ** 2 / np.sum((X.flatten() - x_mean) ** 2)
-    )
-
-    y_upper = y_pred + margin
-    y_lower = y_pred - margin
+    p = 2  # número de parámetros (pendiente e intercepto)
+    
+    # Error estándar residual
+    residuals = y - y_pred
+    RSS = np.sum(residuals**2)
+    sigma = np.sqrt(RSS / (n - p))
+    
+    # Matriz de diseño
+    X_design = np.column_stack([np.ones(n), X.flatten()])
+    
+    # Matriz de covarianza de los parámetros
+    try:
+        cov_matrix = np.linalg.inv(X_design.T @ X_design) * (sigma**2)
+    except np.linalg.LinAlgError:
+        raise ValueError("No se puede calcular la matriz de covarianza - posiblemente datos colineales")
+    
+    # Errores estándar de los parámetros
+    se_intercept = np.sqrt(cov_matrix[0, 0])
+    se_slope = np.sqrt(cov_matrix[1, 1])
+    
+    # Valor t para intervalo de confianza (95%)
+    t_val = sps.t.ppf(1 - 0.05/2, df=n - p)
+    
+    # Calcular franja de error considerando incertidumbre en ambos parámetros
+    x_vals = np.linspace(X.min(), X.max(), 100)
+    y_main = model.intercept_ + model.coef_[0] * x_vals
+    
+    # Límites superior e inferior considerando errores en ambos parámetros
+    y_upper = (model.intercept_ + t_val * se_intercept) + (model.coef_[0] + t_val * se_slope) * x_vals
+    y_lower = (model.intercept_ - t_val * se_intercept) + (model.coef_[0] - t_val * se_slope) * x_vals
 
     fig = go.Figure()
 
@@ -1358,34 +1435,68 @@ def plot_precio_vs_unidades_inflacion(df, Inflacion=False, dfInflacion=None, ani
 
     # Línea regresión
     fig.add_trace(go.Scatter(
-        x=X.flatten(),
-        y=y_pred,
+        x=x_vals,
+        y=y_main,
         mode='lines',
         name='Tendencia (Regresión lineal)',
         line=dict(color='red')
     ))
 
-    # Banda intervalo confianza
+    # Banda de error del ajuste (basada en errores de parámetros)
     fig.add_trace(go.Scatter(
-        x=np.concatenate([X.flatten(), X.flatten()[::-1]]),
+        x=np.concatenate([x_vals, x_vals[::-1]]),
         y=np.concatenate([y_upper, y_lower[::-1]]),
         fill='toself',
-        fillcolor='rgba(255, 0, 0, 0.2)',  # rojo transparente
+        fillcolor='rgba(255, 0, 0, 0.2)',
         line=dict(color='rgba(255,255,255,0)'),
         hoverinfo='skip',
         showlegend=True,
-        name='Intervalo confianza 95%'
+        name='Franja de error del ajuste (95%)'
     ))
 
     titulo_inflacion = f" (Precio ajustado por inflación: {Inflacion_Choice})" if Inflacion else ""
     fig.update_layout(
         title=f"Correlación Precio Unitario vs Unidades Vendidas{titulo_inflacion} (r={corr_coef:.2f})",
-        xaxis_title="Precio Unitario",
+        xaxis_title=x_label,
         yaxis_title="Unidades Vendidas",
         template='plotly_white'
     )
 
-    return fig
+    # Crear DataFrame con los datos utilizados
+    df_datos = df_clean[[columna_precio, 'Cantidad Ofertada']].copy()
+    df_datos.columns = ['Precio', 'Unidades_Vendidas']
+    df_datos['Tipo'] = 'Original'
+    
+    # Agregar datos del modelo
+    df_modelo = pd.DataFrame({
+        'Precio': x_vals,
+        'Unidades_Vendidas': y_main,
+        'Tipo': 'Modelo'
+    })
+    
+    df_datos_completo = pd.concat([df_datos, df_modelo], ignore_index=True)
+
+    # Crear DataFrame con información del ajuste
+    df_ajuste = pd.DataFrame({
+        'Parametro': ['Pendiente', 'Intercepto', 'Coef_Correlacion', 'R_cuadrado', 'N_Puntos', 
+                      'Error_Pendiente', 'Error_Intercepto', 'Valor_t'],
+        'Valor': [model.coef_[0], model.intercept_, corr_coef, model.score(X, y), n,
+                 se_slope, se_intercept, t_val],
+        'Descripcion': [
+            'Pendiente de la recta de regresión',
+            'Punto donde la recta corta el eje Y',
+            'Coeficiente de correlación de Pearson',
+            'Coeficiente de determinación (R²)',
+            'Número de puntos utilizados en el ajuste',
+            'Error estándar de la pendiente',
+            'Error estándar del intercepto',
+            'Valor t de Student para intervalo 95%'
+        ]
+    })
+
+    return fig, df_datos_completo, df_ajuste
+
+
 
 def plot_rfm_norm(df, id_col, df_codigos_desc=None):
     try:
@@ -2538,12 +2649,6 @@ import os
 os.environ["STREAMLIT_SERVER_ENABLE_FILE_WATCHER"] = "false"
 
 
-# ---- 1. Cargar FontAwesome (agrega esto al inicio de tu script) ----
-fontawesome_css = """
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-"""
-st.markdown(fontawesome_css, unsafe_allow_html=True)
-
 ###---SIDE-BAR
 # Logo del INE
 st.sidebar.markdown(
@@ -2896,11 +3001,11 @@ if len(year)>=1:
                                 geo_fig2=plot_precio_vs_unidades_inflacion(df_v)
                                 
                                 if geo_fig2:
-                                    st.plotly_chart(geo_fig2, use_container_width=True, key=f"mapa2_{v}_{idx}" )
+                                    st.plotly_chart(geo_fig2[0], use_container_width=True, key=f"mapa2_{v}_{idx}" )
                             else:
                                 corr_fig=plot_precio_vs_unidades_inflacion(df_v,True,inflacion_year,anio_fin,mes_fin,inflacion_choice)
                                 if corr_fig:
-                                    st.plotly_chart(corr_fig, use_container_width=True, key=f"corr_infla_{v}_{idx}" )
+                                    st.plotly_chart(corr_fig[0], use_container_width=True, key=f"corr_infla_{v}_{idx}" )
             else:
                 st.markdown("Seleccione una variedad para iniciar con el análisis de precios...")
 #=============================
