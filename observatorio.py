@@ -2726,10 +2726,10 @@ if len(year)>=1:
 #   Crear las pestañas
 #====================================
         tab1, tab2, tab3, tab4 = st.tabs([
-            "ℹ Inf. General", 
-            "💰 Análisis Precios", 
+            "ℹ **Inf. General**", 
+            "💰 **Análisis Precios**", 
             "🔄 Análisis RFM",
-            "Análisis 🅰️🅱️©️"
+            "**Análisis** 🅰️🅱️©️"
         ])
                 
         df_filtrado = dfY[dfY["Codigo Insumo"].isin([insumoCode])].copy() #filtrado por codigo de insumo    
