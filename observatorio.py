@@ -2093,7 +2093,7 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
         names='Unidad de Medida',
         values='Cantidad Ofertada',
         category_orders={'Unidad de Medida': orden_variedades},
-        title='<b>Distribución de unidades ofertadas por variedad</b>',
+        title=None,
         color='Unidad de Medida',
         color_discrete_sequence=px.colors.qualitative.Pastel,
         hole=0.3,
