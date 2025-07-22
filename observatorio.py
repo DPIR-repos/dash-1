@@ -2795,13 +2795,13 @@ if len(year)>=1:
                 fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
                 
                 if st.session_state.get("show_variedad_plots", True):
-                    
                     #Mostrar el grafico
                     st.plotly_chart(fig_adjudicaciones[0],  use_container_width=True)
                 
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table", False):
-                    st.dataframe(fig_adjudicaciones[1], hide_index=True)
+                    df_adju=fig_adjudicaciones[1].rename(columns={'Unidad de Medida': 'Variedad'})
+                    st.dataframe(fig_adju, hide_index=True)
                    
             
 #====================================
