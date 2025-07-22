@@ -2305,7 +2305,7 @@ def plot_tiempo_adjudicacion(df_filtrado, orden_variedades=None):
         x='Mes_Anio',
         y='Dias_Adjudicacion',
         color='Unidad de Medida',
-        title='Tiempo Promedio de Adjudicación por Variedad',
+        title=None,
         labels={
             'Mes_Anio': 'Mes y Año',
             'Dias_Adjudicacion': 'Días Promedio de Adjudicación',
@@ -2859,10 +2859,38 @@ if len(year)>=1:
 #   SECTION 1.1: more information    
 #====================================
             col1InfoIn2, col2InfoIn2 = st.columns([0.5, 0.5])
+#===================================
+#   Tiempo promedio de adjudicacion
+#===================================
             with col1InfoIn2:
+                col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])                
+                # Botón para gráficos
+                with col1bot:
+                    st.markdown("**Tiempo promedio de Adjudicación por variedad**")
+                with col2bot:
+                    if st.button("📊", key="toggle_variedad_plot_tiempo", help="""Mostrar gráficos """):
+                        st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
+                        st.session_state.show_variedad_table = False  # Asegurar que la tabla se oculte
+                
+                # Botón para tablas
+                with col3bot:
+                    if st.button("🖽", key="toggle_variedad_table_tiempo", help="""Mostrar tabla de datos """):
+                        st.session_state.show_variedad_table = not st.session_state.get("show_variedad_table", False)
+                        st.session_state.show_variedad_plots = False  # Asegurar que los gráficos se oculten
+                
+                
+                # Llamar a la función
                 fig, stats = plot_tiempo_adjudicacion(df_filtrado, orden_variedades)
-
-                st.plotly_chart(fig, use_container_width=True)
+                
+                # Mostrar gráficos si está activo
+                if st.session_state.get("show_variedad_plots", True):
+                    #Mostrar el grafico
+                    st.plotly_chart(fig,  use_container_width=True, key="fig_uni_of")
+                
+                # Mostrar tablas si está activo
+                if st.session_state.get("show_variedad_table", False):
+                    st.dataframe(stats, hide_index=True, key="df_uni_of")
+                    
                 
             with col2InfoIn2:
                 fig_NOGs=plot_NOGs_por_variedad(df_filtrado,orden_variedades)
