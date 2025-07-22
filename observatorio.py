@@ -2879,26 +2879,26 @@ if len(year)>=1:
                     st.markdown("**Tiempo promedio de adjudicación por variedad**")
                 with col2bot:
                     if st.button("📊", key="toggle_variedad_plot_tiempo", help="""Mostrar gráficos """):
-                        st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
-                        st.session_state.show_variedad_table = False  # Asegurar que la tabla se oculte
+                        st.session_state.show_variedad_plots_tiempo= not st.session_state.get("show_variedad_plots_tiempo", False)
+                        st.session_state.show_variedad_table_tiempo= False  # Asegurar que la tabla se oculte
                 
                 # Botón para tablas
                 with col3bot:
                     if st.button("🖽", key="toggle_variedad_table_tiempo", help="""Mostrar tabla de datos """):
-                        st.session_state.show_variedad_table = not st.session_state.get("show_variedad_table", False)
-                        st.session_state.show_variedad_plots = False  # Asegurar que los gráficos se oculten
+                        st.session_state.show_variedad_table_tiempo= not st.session_state.get("show_variedad_table_tiempo", False)
+                        st.session_state.show_variedad_plots_tiempo= False  # Asegurar que los gráficos se oculten
                 
                 
                 # Llamar a la función
                 fig, stats = plot_tiempo_adjudicacion(df_filtrado, orden_variedades)
                 
                 # Mostrar gráficos si está activo
-                if st.session_state.get("show_variedad_plots", True):
+                if st.session_state.get("show_variedad_plots_tiempo", True):
                     #Mostrar el grafico
                     st.plotly_chart(fig,  use_container_width=True, key="fig_tiempo")
                 
                 # Mostrar tablas si está activo
-                if st.session_state.get("show_variedad_table", False):
+                if st.session_state.get("show_variedad_table_tiempo", False):
                     statsF=stats.rename(columns={'Mes_anio': 'Mes-Año', 'Unidad de Medida': 'Variedad', 'Dias_Adjudicacion': 'Tiempo promedio'})
                     st.dataframe(statsF, hide_index=True, key="df_tiempo")
                     st.markdown(""" *El tiempo promedio de adjudicación (en días) se calcula promediando las 
