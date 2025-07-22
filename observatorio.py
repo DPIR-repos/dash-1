@@ -2866,7 +2866,7 @@ if len(year)>=1:
                 col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])                
                 # Botón para gráficos
                 with col1bot:
-                    st.markdown("**Tiempo promedio de Adjudicación por variedad**")
+                    st.markdown("**Tiempo promedio de ddjudicación por variedad**")
                 with col2bot:
                     if st.button("📊", key="toggle_variedad_plot_tiempo", help="""Mostrar gráficos """):
                         st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
@@ -2885,11 +2885,11 @@ if len(year)>=1:
                 # Mostrar gráficos si está activo
                 if st.session_state.get("show_variedad_plots", True):
                     #Mostrar el grafico
-                    st.plotly_chart(fig,  use_container_width=True, key="fig_uni_of")
+                    st.plotly_chart(fig,  use_container_width=True, key="fig_tiempo")
                 
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table", False):
-                    st.dataframe(stats, hide_index=True, key="df_uni_of")
+                    st.dataframe(stats, hide_index=True, key="df_tiempo")
                     
                 
             with col2InfoIn2:
