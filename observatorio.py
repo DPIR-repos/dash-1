@@ -2272,6 +2272,7 @@ def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
     
     return fig, df_resultado
 
+
 def plot_tiempo_adjudicacion(df_filtrado, orden_variedades=None):
     """
     Calcula el tiempo de adjudicación (días entre publicación y adjudicación) y genera un gráfico de líneas por variedad (Unidad de Medida).
@@ -2933,7 +2934,6 @@ if len(year)>=1:
                 
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table", False):
-                    statsF=stats.rename(columns={'Mes_anio': 'Mes-Año', 'Unidad de Medida': 'Variedad', 'Dias_Adjudicacion': 'Tiempo promedio'})
                     st.dataframe(df_NOGs, hide_index=True, key="df_NOG")
                     st.markdown(""" *El número de NOGs solo toma en cuenta aquellos que fueron adjudicados """ )
                     
