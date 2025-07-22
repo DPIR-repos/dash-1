@@ -2769,6 +2769,8 @@ if len(year)>=1:
                 col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])
                 
                 # Botón para gráficos
+                with col1bot:
+                    st.markdown("Número de adjudicaciones por variedad")
                 with col2bot:
                     if st.button("📊", key="toggle_variedad_plot", help="""Mostrar gráficos """):
                         st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
