@@ -2890,8 +2890,8 @@ if len(year)>=1:
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table", False):
                     statsF=stats.rename(columns={'Mes_anio': 'Mes-Año', 'Unidad de Medida': 'Variedad', 'Dias_Adjudicacion': 'Tiempo promedio'})
-                    st.dataframe(stats, hide_index=True, key="df_tiempo")
-                    st.text(""" *El tiempo promedio de adjudicación (en días) se calcula promediando las 
+                    st.dataframe(statsF, hide_index=True, key="df_tiempo")
+                    st.markdown(""" *El tiempo promedio de adjudicación (en días) se calcula promediando las 
                             diferencias entre la fecha de publicación de la oferta y la fecha de adjudicación de la misma oferta.""")
                     
                 
