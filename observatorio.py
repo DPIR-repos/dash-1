@@ -2767,7 +2767,7 @@ if len(year)>=1:
                     )
                 col1InfoIn, col2InfoIn = st.columns([0.95, 0.05])
                 with col1InfoIn:
-                    with st.expander("**Número de adjudicaciones por variedad**", expanded=True)
+                    with st.expander("**Número de adjudicaciones por variedad**", expanded=True):
                     # Llamar a la función
                         fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
                     # Mostrar el gráfico
