@@ -2800,24 +2800,24 @@ if len(year)>=1:
                     st.markdown("**Número de adjudicaciones por variedad**")
                 with col2bot:
                     if st.button("📊", key="toggle_variedad_plot_adj", help="""Mostrar gráficos """):
-                        st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
-                        st.session_state.show_variedad_table = False  # Asegurar que la tabla se oculte
+                        st.session_state.show_variedad_plots_adj = not st.session_state.get("show_variedad_plots_adj", False)
+                        st.session_state.show_variedad_table_adj = False  # Asegurar que la tabla se oculte
                 
                 # Botón para tablas
                 with col3bot:
                     if st.button("🖽", key="toggle_variedad_table_adj", help="""Mostrar tabla de datos """):
-                        st.session_state.show_variedad_table = not st.session_state.get("show_variedad_table", False)
-                        st.session_state.show_variedad_plots = False  # Asegurar que los gráficos se oculten
+                        st.session_state.show_variedad_table_adj = not st.session_state.get("show_variedad_table_adj", False)
+                        st.session_state.show_variedad_plots_adj = False  # Asegurar que los gráficos se oculten
                 
                 # Mostrar gráficos si está activo
                 fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
                 
-                if st.session_state.get("show_variedad_plots", True):
+                if st.session_state.get("show_variedad_plots_adj", True):
                     #Mostrar el grafico
                     st.plotly_chart(fig_adjudicaciones[0],  use_container_width=True, key="fig_adj_va")
                 
                 # Mostrar tablas si está activo
-                if st.session_state.get("show_variedad_table", False):
+                if st.session_state.get("show_variedad_table_adj", False):
                     df_adju=fig_adjudicaciones[1].rename(columns={'Unidad de Medida': 'Variedad'})
                     st.dataframe(df_adju, hide_index=True, key="df_adju_va")
 #===================================
@@ -2850,7 +2850,7 @@ if len(year)>=1:
                 
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table", False):
-                    df_pieF=df_pie.rename(columns={'Unidad de Medida': 'Variedad'})
+                    df_pieF=df_pie.rename(columns={'Unidad de Medida': 'Variedad', 'Adjudicado': 'Adjudicaciones'})
                     st.dataframe(df_pieF, hide_index=True, key="df_uni_of")
                 
                   
