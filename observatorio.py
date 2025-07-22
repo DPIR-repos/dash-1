@@ -2053,13 +2053,22 @@ def obtener_orden_variedades(df_filtrado):
 
 def plot_variedades_pie(df_filtrado, orden_variedades):
     """
-    Crea un gráfico de pastel con la distribución de unidades ofertadas por variedad.
+    Genera un gráfico de pastel y un DataFrame con la distribución de unidades ofertadas por variedad.
     
     Args:
-        df_filtrado (pd.DataFrame): DataFrame filtrado por código de insumo.
+        df_filtrado (pd.DataFrame): DataFrame filtrado que contiene los datos de ofertas.
+                                   Debe contener las columnas 'Unidad de Medida' y 'Cantidad Ofertada'.
+        orden_variedades (list): Lista con el orden deseado de las variedades a mostrar en el gráfico.
         
     Returns:
-        plotly.graph_objects.Figure: Gráfico de pastel interactivo.
+        tuple: Una tupla que contiene:
+            - plotly.graph_objects.Figure: Gráfico de pastel interactivo.
+            - pd.DataFrame: DataFrame con las variedades y sus cantidades ofertadas, ordenado según el gráfico.
+            
+    Example:
+        >>> fig, df_resultado = plot_variedades_pie(df_filtrado, ['Variedad A', 'Variedad B'])
+        >>> fig.show()
+        >>> print(df_resultado)
     """
     # Agrupar por variedad y sumar las unidades ofertadas
     df_variedades = (
@@ -2070,8 +2079,8 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
         .reset_index()
     )
     
-    # Ordenar de mayor a menor (opcional, para mejor visualización)
-    #df_variedades = df_variedades.sort_values('Cantidad Ofertada', ascending=False)
+    # Crear copia del DataFrame para retornar
+    df_resultado = df_variedades.copy()
     
     # Crear el pie chart
     fig = px.pie(
@@ -2079,7 +2088,7 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
         names='Unidad de Medida',
         values='Cantidad Ofertada',
         category_orders={'Unidad de Medida': orden_variedades},  # Orden consistente
-        title='<b>Distribución de unidades ofertadas por variedad</b>',
+        title=None,
         color='Unidad de Medida',
         color_discrete_sequence=px.colors.qualitative.Pastel,
         hole=0.3,  # Agujero en el centro (opcional, quitar si no se desea)
@@ -2110,7 +2119,7 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
         insidetextorientation='radial'  # Orientación del texto
     )
     
-    return fig
+    return fig, df_resultado
 
 def plot_adjudicaciones_por_variedad(df_filtrado, orden_variedades):
     """
@@ -2774,9 +2783,12 @@ if len(year)>=1:
                         hide_index=True,
                         use_container_width=True
                     )
-                
-                col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])
-                
+            
+                #================================
+                #   Adjudicaciones por variedad  
+                #================================
+              
+                col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])                
                 # Botón para gráficos
                 with col1bot:
                     st.markdown("**Número de adjudicaciones por variedad**")
@@ -2802,7 +2814,40 @@ if len(year)>=1:
                 if st.session_state.get("show_variedad_table", False):
                     df_adju=fig_adjudicaciones[1].rename(columns={'Unidad de Medida': 'Variedad'})
                     st.dataframe(df_adju, hide_index=True, key="df_adju_va")
-                   
+#===================================
+#   Unidades ofertadas por variedad 
+#===================================
+            with col2Info:
+                col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])                
+                # Botón para gráficos
+                with col1bot:
+                    st.markdown("**Distribución de unidades ofertadas por variedad**")
+                with col2bot:
+                    if st.button("📊", key="toggle_variedad_plot_uni_of", help="""Mostrar gráficos """):
+                        st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
+                        st.session_state.show_variedad_table = False  # Asegurar que la tabla se oculte
+                
+                # Botón para tablas
+                with col3bot:
+                    if st.button("🖽", key="toggle_variedad_table_uni_of", help="""Mostrar tabla de datos """):
+                        st.session_state.show_variedad_table = not st.session_state.get("show_variedad_table", False)
+                        st.session_state.show_variedad_plots = False  # Asegurar que los gráficos se oculten
+                
+                
+                # Llamar a la función
+                fig_pie, df_pie = plot_variedades_pie(df_filtrado,orden_variedades)
+                
+                # Mostrar gráficos si está activo
+                if st.session_state.get("show_variedad_plots", True):
+                    #Mostrar el grafico
+                    st.plotly_chart(fig_pie,  use_container_width=True, key="fig_uni_of")
+                
+                # Mostrar tablas si está activo
+                if st.session_state.get("show_variedad_table", False):
+                    df_pieF=df_pie.rename(columns={'Unidad de Medida': 'Variedad'})
+                    st.dataframe(df_pieF, hide_index=True, key="df_uni_of")
+                
+                  
             
 #====================================
 #   SECTION 1.1: more information    
@@ -2825,11 +2870,6 @@ if len(year)>=1:
                 df_filtrado_2=df_filtrado.rename(columns=change_columns).copy()
                 st.dataframe(df_filtrado_2,hide_index=True)    
                 
-            with col2Info:
-                # Llamar a la función
-                fig_pie = plot_variedades_pie(df_filtrado,orden_variedades)
-                # Mostrar el gráfico
-                st.plotly_chart(fig_pie, height=100)
             
             variedad_select = st.sidebar.multiselect(
                 "🔍 Buscar o seleccionar la variedad:",
