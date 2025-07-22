@@ -2053,7 +2053,8 @@ def obtener_orden_variedades(df_filtrado):
 
 def plot_variedades_pie(df_filtrado, orden_variedades):
     """
-    Genera un gráfico de pastel y un DataFrame con la distribución de unidades ofertadas por variedad.
+    Genera un gráfico de pastel y un DataFrame con la distribución de unidades ofertadas por variedad,
+    incluyendo una columna con el porcentaje de cada variedad.
     
     Args:
         df_filtrado (pd.DataFrame): DataFrame filtrado que contiene los datos de ofertas.
@@ -2063,7 +2064,7 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
     Returns:
         tuple: Una tupla que contiene:
             - plotly.graph_objects.Figure: Gráfico de pastel interactivo.
-            - pd.DataFrame: DataFrame con las variedades y sus cantidades ofertadas, ordenado según el gráfico.
+            - pd.DataFrame: DataFrame con las variedades, cantidades ofertadas y porcentajes, ordenado según el gráfico.
             
     Example:
         >>> fig, df_resultado = plot_variedades_pie(df_filtrado, ['Variedad A', 'Variedad B'])
@@ -2079,6 +2080,10 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
         .reset_index()
     )
     
+    # Calcular el porcentaje de cada variedad
+    total = df_variedades['Cantidad Ofertada'].sum()
+    df_variedades['Porcentaje'] = (df_variedades['Cantidad Ofertada'] / total * 100).round(1)
+    
     # Crear copia del DataFrame para retornar
     df_resultado = df_variedades.copy()
     
@@ -2087,25 +2092,25 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
         df_variedades,
         names='Unidad de Medida',
         values='Cantidad Ofertada',
-        category_orders={'Unidad de Medida': orden_variedades},  # Orden consistente
-        title=None,
+        category_orders={'Unidad de Medida': orden_variedades},
+        title='<b>Distribución de unidades ofertadas por variedad</b>',
         color='Unidad de Medida',
         color_discrete_sequence=px.colors.qualitative.Pastel,
-        hole=0.3,  # Agujero en el centro (opcional, quitar si no se desea)
+        hole=0.3,
         labels={'Unidad de Medida': 'Variedad', 'Cantidad Ofertada': 'Unidades'}
     )
     
     # Personalizar diseño
     fig.update_layout(
         margin=dict(l=20, r=20, t=50, b=0),
-        plot_bgcolor='rgba(0,0,0,0)',  # Fondo transparente
+        plot_bgcolor='rgba(0,0,0,0)',
         showlegend=True,
         legend=dict(
-            x=-0.2,              # Posición horizontal (negativo = izquierda)
-            y=1,               # Posición vertical (>1 = arriba)
-            xanchor='left',       # Anclaje al borde izquierdo
-            yanchor='top',       # Anclaje al borde superior
-            bgcolor='rgba(0,0,0,0)',  # Fondo semitransparente
+            x=-0.2,
+            y=1,
+            xanchor='left',
+            yanchor='top',
+            bgcolor='rgba(0,0,0,0)',
             bordercolor='#CCC',
             borderwidth=1
         )
@@ -2114,12 +2119,13 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
     # Formatear tooltips y etiquetas
     fig.update_traces(
         hovertemplate='<b>%{label}</b><br>Porcentaje: %{percent:.1%}<br>Unidades: %{value:,.0f}',
-        textinfo='percent',  # Muestra porcentaje y etiqueta
-        textposition='inside',     # Texto dentro de las porciones
-        insidetextorientation='radial'  # Orientación del texto
+        textinfo='percent',
+        textposition='inside',
+        insidetextorientation='radial'
     )
     
     return fig, df_resultado
+
 
 def plot_adjudicaciones_por_variedad(df_filtrado, orden_variedades):
     """
