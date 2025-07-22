@@ -2765,13 +2765,36 @@ if len(year)>=1:
                         hide_index=True,
                         use_container_width=True
                     )
-                col1InfoIn, col2InfoIn = st.columns([0.99, 0.01])
-                with col1InfoIn:
-                    with st.expander("**Número de adjudicaciones por variedad**", expanded=True):
-                    # Llamar a la función
-                        fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
-                    # Mostrar el gráfico
-                        st.plotly_chart(fig_adjudicaciones,  use_container_width=True)
+                
+                col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])
+                
+                # Botón para gráficos
+                with col2bot:
+                    if st.button("📊", key="toggle_variedad_plot", help="""Mostrar gráficos """):
+                        st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
+                        st.session_state.show_variedad_table = False  # Asegurar que la tabla se oculte
+                
+                # Botón para tablas
+                with col3bot:
+                    if st.button("🖽", key="toggle_variedad_table", help="""Mostrar tabla de datos """):
+                        st.session_state.show_variedad_table = not st.session_state.get("show_variedad_table", False)
+                        st.session_state.show_variedad_plots = False  # Asegurar que los gráficos se oculten
+                
+                # Mostrar gráficos si está activo
+                if st.session_state.get("show_variedad_plots", True):
+                    fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
+                    #Mostrar el grafico
+                    st.plotly_chart(fig_adjudicaciones,  use_container_width=True)
+                
+                # Mostrar tablas si está activo
+                if st.session_state.get("show_variedad_table", False):
+                    st.markdown(
+                            f"""
+                            *RFM_Score tomando los pesos R={wR}, F={wF}, M={wM}  
+                            <a href="/documentacion#analisis-rfm" target="_self" style="text-decoration: none; color: #1f77b4; font-size: 0.8em;">[Ver documentación]</a>
+                            """,
+                            unsafe_allow_html=True
+                        )
                    
             
 #====================================
