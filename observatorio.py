@@ -2933,7 +2933,7 @@ if len(year)>=1:
                     st.plotly_chart(fig_NOG,  use_container_width=True, key="fig_NOG")
                 
                 # Mostrar tablas si está activo
-                if st.session_state.get("show_variedad_table", False):
+                if st.session_state.get("show_variedad_table_NOG", False):
                     st.dataframe(df_NOGs, hide_index=True, key="df_NOG")
                     st.markdown(""" *El número de NOGs solo toma en cuenta aquellos que fueron adjudicados """ )
                     
