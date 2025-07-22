@@ -2781,13 +2781,13 @@ if len(year)>=1:
                 with col1bot:
                     st.markdown("**Número de adjudicaciones por variedad**")
                 with col2bot:
-                    if st.button("📊", key="toggle_variedad_plot", help="""Mostrar gráficos """):
+                    if st.button("📊", key="toggle_variedad_plot_adj", help="""Mostrar gráficos """):
                         st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
                         st.session_state.show_variedad_table = False  # Asegurar que la tabla se oculte
                 
                 # Botón para tablas
                 with col3bot:
-                    if st.button("🖽", key="toggle_variedad_table", help="""Mostrar tabla de datos """):
+                    if st.button("🖽", key="toggle_variedad_table_adj", help="""Mostrar tabla de datos """):
                         st.session_state.show_variedad_table = not st.session_state.get("show_variedad_table", False)
                         st.session_state.show_variedad_plots = False  # Asegurar que los gráficos se oculten
                 
