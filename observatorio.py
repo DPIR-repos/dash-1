@@ -2930,7 +2930,7 @@ if len(year)>=1:
                 # Mostrar gráficos si está activo
                 if st.session_state.get("show_variedad_plots_NOG", True):
                     #Mostrar el grafico
-                    st.plotly_chart(fig_NOG,  use_container_width=True, key="fig_NOG")
+                    st.plotly_chart(fig_NOGs,  use_container_width=True, key="fig_NOG")
                 
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table_NOG", False):
