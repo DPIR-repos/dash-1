@@ -2923,7 +2923,10 @@ if len(year)>=1:
                         st.session_state.show_variedad_table_NOG = not st.session_state.get("show_variedad_table_NOG", False)
                         st.session_state.show_variedad_plots_NOG = False  # Asegurar que los gráficos se oculten
                 
-                
+                if 'show_variedad_plots_NOG' not in st.session_state:
+                    st.session_state.show_variedad_plots_NOG = True
+                if 'show_variedad_table_NOG' not in st.session_state:
+                    st.session_state.show_variedad_table_NOG = False
                 # Llamar a la función
                 fig_NOGs, df_NOGs=plot_NOGs_por_variedad(df_filtrado,orden_variedades)
                 
