@@ -2140,7 +2140,7 @@ def plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades):
         y='Unidad de Medida',
         x='Adjudicado',
         orientation='h',  # Barras horizontales
-        title='<b>Número de adjudicaciones por variedad</b>',
+        title=None,
         labels={'Unidad de Medida': 'Variedad', 'Adjudicado': 'Adjudicaciones'},
         category_orders={'Unidad de Medida': orden_variedades},  # Orden consistente
         color='Unidad de Medida',
@@ -2767,10 +2767,11 @@ if len(year)>=1:
                     )
                 col1InfoIn, col2InfoIn = st.columns([0.95, 0.05])
                 with col1InfoIn:
-                    # Llamar a la función
-                    fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
-                    # Mostrar el gráfico
-                    st.plotly_chart(fig_adjudicaciones,  use_container_width=True)
+                    st.expander("**Número de adjudicaciones por variedad**", expanded=True)
+                        # Llamar a la función
+                        fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
+                        # Mostrar el gráfico
+                        st.plotly_chart(fig_adjudicaciones,  use_container_width=True)
                    
             
 #====================================
