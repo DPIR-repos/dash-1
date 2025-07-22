@@ -2238,7 +2238,7 @@ def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
         y='Unidad de Medida',  # Eje Y para variedades (barras horizontales)
         x='NOG',               # Eje X para conteo
         orientation='h',        # Barras horizontales
-        title='<b>Número de NOGs distintos por variedad</b>',
+        title=None,
         labels={'Unidad de Medida': 'Variedad', 'NOG': 'Número de NOGs'},
         category_orders={'Unidad de Medida': orden_variedades},
         color='Unidad de Medida',
