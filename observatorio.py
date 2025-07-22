@@ -2765,7 +2765,7 @@ if len(year)>=1:
                         hide_index=True,
                         use_container_width=True
                     )
-                col1InfoIn, col2InfoIn = st.columns([0.95, 0.05])
+                col1InfoIn, col2InfoIn = st.columns([0.99, 0.01])
                 with col1InfoIn:
                     with st.expander("**Número de adjudicaciones por variedad**", expanded=True):
                     # Llamar a la función
