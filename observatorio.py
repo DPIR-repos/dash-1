@@ -2850,7 +2850,7 @@ if len(year)>=1:
                 
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table_uni_of", False):
-                    df_pieF=df_pie.rename(columns={'Unidad de Medida': 'Variedad', 'Adjudicado': 'Adjudicaciones'})
+                    df_pieF=df_pie.rename(columns={'Unidad de Medida': 'Variedad', 'Cantidad Ofertada': 'Unidades Ofertadas'})
                     st.dataframe(df_pieF, hide_index=True, key="df_uni_of")
                 
                   
