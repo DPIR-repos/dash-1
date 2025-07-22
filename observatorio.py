@@ -2818,7 +2818,7 @@ if len(year)>=1:
                 
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table_adj", False):
-                    df_adju=fig_adjudicaciones[1].rename(columns={'Unidad de Medida': 'Variedad'})
+                    df_adju=fig_adjudicaciones[1].rename(columns={'Unidad de Medida': 'Variedad', 'Adjudicado': 'Adjudicaciones'})
                     st.dataframe(df_adju, hide_index=True, key="df_adju_va")
 #===================================
 #   Unidades ofertadas por variedad 
@@ -2830,26 +2830,26 @@ if len(year)>=1:
                     st.markdown("**Distribución de unidades ofertadas por variedad**")
                 with col2bot:
                     if st.button("📊", key="toggle_variedad_plot_uni_of", help="""Mostrar gráficos """):
-                        st.session_state.show_variedad_plots = not st.session_state.get("show_variedad_plots", False)
-                        st.session_state.show_variedad_table = False  # Asegurar que la tabla se oculte
+                        st.session_state.show_variedad_plots_uni_of = not st.session_state.get("show_variedad_plots_uni_of", False)
+                        st.session_state.show_variedad_table_uni_of = False  # Asegurar que la tabla se oculte
                 
                 # Botón para tablas
                 with col3bot:
                     if st.button("🖽", key="toggle_variedad_table_uni_of", help="""Mostrar tabla de datos """):
-                        st.session_state.show_variedad_table = not st.session_state.get("show_variedad_table", False)
-                        st.session_state.show_variedad_plots = False  # Asegurar que los gráficos se oculten
+                        st.session_state.show_variedad_table_uni_of = not st.session_state.get("show_variedad_table_uni_of", False)
+                        st.session_state.show_variedad_plots_uni_of = False  # Asegurar que los gráficos se oculten
                 
                 
                 # Llamar a la función
                 fig_pie, df_pie = plot_variedades_pie(df_filtrado,orden_variedades)
                 
                 # Mostrar gráficos si está activo
-                if st.session_state.get("show_variedad_plots", True):
+                if st.session_state.get("show_variedad_plots_uni_of", True):
                     #Mostrar el grafico
                     st.plotly_chart(fig_pie,  use_container_width=True, key="fig_uni_of")
                 
                 # Mostrar tablas si está activo
-                if st.session_state.get("show_variedad_table", False):
+                if st.session_state.get("show_variedad_table_uni_of", False):
                     df_pieF=df_pie.rename(columns={'Unidad de Medida': 'Variedad', 'Adjudicado': 'Adjudicaciones'})
                     st.dataframe(df_pieF, hide_index=True, key="df_uni_of")
                 
