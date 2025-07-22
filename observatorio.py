@@ -2191,13 +2191,14 @@ def plot_adjudicaciones_por_variedad(df_filtrado, orden_variedades):
     
     return fig, df_resultado
 
+
 def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
     """
-    Crea un gráfico de barras con el número de NOGs únicos por variedad.
+    Genera un gráfico de barras horizontales y un DataFrame con el número de NOGs únicos por variedad.
     
-    Esta función toma un DataFrame filtrado y genera una visualización del conteo de
-    Números de Orden de Grano (NOGs) distintos para cada variedad, ordenados según
-    la lista proporcionada.
+    Esta función toma un DataFrame filtrado y genera:
+    1. Una visualización del conteo de Números de Orden de Grano (NOGs) distintos para cada variedad
+    2. Un DataFrame con los datos utilizados en el gráfico, incluyendo el conteo de NOGs únicos
     
     Args:
         df_filtrado (pd.DataFrame): DataFrame filtrado que contiene los datos de NOGs.
@@ -2206,13 +2207,17 @@ def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
             las variedades en el gráfico.
             
     Returns:
-        plotly.graph_objects.Figure: Objeto de figura de Plotly con el gráfico de
-        barras horizontales interactivo.
+        tuple: Una tupla que contiene:
+            - plotly.graph_objects.Figure: Objeto de figura de Plotly con el gráfico de
+              barras horizontales interactivo.
+            - pd.DataFrame: DataFrame con las variedades y sus conteos de NOGs únicos,
+              ordenado según el parámetro orden_variedades.
         
     Example:
         >>> orden = ['Variedad A', 'Variedad B', 'Variedad C']
-        >>> fig = plot_NOGs_por_variedad(df_filtrado, orden)
+        >>> fig, df_resultado = plot_NOGs_por_variedad(df_filtrado, orden)
         >>> fig.show()
+        >>> print(df_resultado)
     """
     # Contar NOGs únicos por variedad (usando nunique para contar valores distintos)
     df_nogs = (
@@ -2222,6 +2227,10 @@ def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
         .loc[orden_variedades]  # Mantener el orden especificado
         .reset_index()
     )
+    
+    # Crear copia del DataFrame para retornar
+    df_resultado = df_nogs.copy()
+    df_resultado.columns = ['Variedad', 'NOGs Únicos']  # Renombrar columnas para claridad
     
     # Crear el gráfico de barras HORIZONTALES
     fig = px.bar(
@@ -2261,7 +2270,7 @@ def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
         title_standoff=15        # Espacio entre ejes y título
     )
     
-    return fig
+    return fig, df_resultado
 
 def plot_tiempo_adjudicacion(df_filtrado, orden_variedades=None):
     """
@@ -2893,13 +2902,43 @@ if len(year)>=1:
                     st.dataframe(statsF, hide_index=True, key="df_tiempo")
                     st.markdown(""" *El tiempo promedio de adjudicación (en días) se calcula promediando las 
                             diferencias entre la fecha de publicación de la oferta y la fecha de adjudicación de la misma oferta.""")
-                    
+#=============================
+#   NOGs por variedad
+#=============================                    
                 
             with col2InfoIn2:
-                fig_NOGs=plot_NOGs_por_variedad(df_filtrado,orden_variedades)
+                col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05])                
+                # Botón para gráficos
+                with col1bot:
+                    st.markdown("**Número de NOGs por variedad**")
+                with col2bot:
+                    if st.button("📊", key="toggle_variedad_plot_NOG", help="""Mostrar gráficos """):
+                        st.session_state.show_variedad_plots_NOG = not st.session_state.get("show_variedad_plots_NOG", False)
+                        st.session_state.show_variedad_table_NOG = False  # Asegurar que la tabla se oculte
                 
-                    # Mostrar el gráfico
-                st.plotly_chart(fig_NOGs,  use_container_width=True)
+                # Botón para tablas
+                with col3bot:
+                    if st.button("🖽", key="toggle_variedad_table_NOG", help="""Mostrar tabla de datos """):
+                        st.session_state.show_variedad_table_NOG = not st.session_state.get("show_variedad_table_NOG", False)
+                        st.session_state.show_variedad_plots_NOG = False  # Asegurar que los gráficos se oculten
+                
+                
+                # Llamar a la función
+                fig_NOGs, df_NOGs=plot_NOGs_por_variedad(df_filtrado,orden_variedades)
+                
+                # Mostrar gráficos si está activo
+                if st.session_state.get("show_variedad_plots_NOG", True):
+                    #Mostrar el grafico
+                    st.plotly_chart(fig_NOG,  use_container_width=True, key="fig_NOG")
+                
+                # Mostrar tablas si está activo
+                if st.session_state.get("show_variedad_table", False):
+                    statsF=stats.rename(columns={'Mes_anio': 'Mes-Año', 'Unidad de Medida': 'Variedad', 'Dias_Adjudicacion': 'Tiempo promedio'})
+                    st.dataframe(df_NOGs, hide_index=True, key="df_NOG")
+                    st.markdown(""" *El número de NOGs solo toma en cuenta aquellos que fueron adjudicados """ )
+                    
+                
+
 ####dataframe con la base de datos 
             with st.expander(f" **Base de datos para el código**: {', '.join(map(str, insumoCode)) if isinstance(insumoCode, list) else insumoCode} - {df_filtrado['Insumo Match'].iloc[0]}"):
                 change_columns={'Localidad Oferente':'Municipio Oferente','Region Oferente': 'Departamento Oferente', 
