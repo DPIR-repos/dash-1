@@ -2112,15 +2112,24 @@ def plot_variedades_pie(df_filtrado, orden_variedades):
     
     return fig
 
-def plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades):
+def plot_adjudicaciones_por_variedad(df_filtrado, orden_variedades):
     """
-    Crea un gráfico de barras horizontales con el número de adjudicaciones por variedad.
+    Genera un gráfico de barras horizontales y un DataFrame con el número de adjudicaciones por variedad.
     
     Args:
-        df_filtrado (pd.DataFrame): DataFrame filtrado por código de insumo.
+        df_filtrado (pd.DataFrame): DataFrame filtrado que contiene los datos de adjudicaciones.
+                                   Debe contener las columnas 'Unidad de Medida' y 'Adjudicado'.
+        orden_variedades (list): Lista con el orden deseado de las variedades a mostrar en el gráfico.
         
     Returns:
-        plotly.graph_objects.Figure: Gráfico de barras interactivo.
+        tuple: Una tupla que contiene:
+            - plotly.graph_objects.Figure: Gráfico de barras horizontales interactivo.
+            - pd.DataFrame: DataFrame con las variedades y sus adjudicaciones, ordenado según el gráfico.
+            
+    Example:
+        >>> fig, df_resultado = plot_adjudicaciones_por_variedad(df_filtrado, ['Variedad A', 'Variedad B'])
+        >>> fig.show()
+        >>> print(df_resultado)
     """
     # Agrupar por variedad y sumar las adjudicaciones (1=adjudicado, 0=no adjudicado)
     df_adjudicaciones = (
@@ -2131,8 +2140,8 @@ def plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades):
         .reset_index()
     )
     
-    # Ordenar de mayor a menor adjudicaciones
-    #df_adjudicaciones = df_adjudicaciones.sort_values('Adjudicado', ascending=True)  # Ascendente para barras horizontales
+    # Crear copia del DataFrame para retornar
+    df_resultado = df_adjudicaciones.copy()
     
     # Crear el gráfico de barras horizontales
     fig = px.bar(
@@ -2165,7 +2174,7 @@ def plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades):
         textposition='outside'
     )
     
-    return fig
+    return fig, df_resultado
 
 def plot_NOGs_por_variedad(df_filtrado, orden_variedades):
     """
@@ -2783,20 +2792,16 @@ if len(year)>=1:
                         st.session_state.show_variedad_plots = False  # Asegurar que los gráficos se oculten
                 
                 # Mostrar gráficos si está activo
+                fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
+                
                 if st.session_state.get("show_variedad_plots", True):
-                    fig_adjudicaciones = plot_adjudicaciones_por_variedad(df_filtrado,orden_variedades)
+                    
                     #Mostrar el grafico
-                    st.plotly_chart(fig_adjudicaciones,  use_container_width=True)
+                    st.plotly_chart(fig_adjudicaciones[0],  use_container_width=True)
                 
                 # Mostrar tablas si está activo
                 if st.session_state.get("show_variedad_table", False):
-                    st.markdown(
-                            f"""
-                            *RFM_Score tomando los pesos R={wR}, F={wF}, M={wM}  
-                            <a href="/documentacion#analisis-rfm" target="_self" style="text-decoration: none; color: #1f77b4; font-size: 0.8em;">[Ver documentación]</a>
-                            """,
-                            unsafe_allow_html=True
-                        )
+                    st.dataframe(fig_adjudicaciones[1], hide_index=True)
                    
             
 #====================================
