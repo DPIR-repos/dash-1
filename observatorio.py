@@ -2743,6 +2743,14 @@ if len(year)>=1:
         how='left'
     )
     codigo_a_descripcion = dict(zip(df_codigos_desc['Codigo Insumo'], df_codigos_desc['Insumo Match']))
+    
+    score_option = st.sidebar.selectbox(
+        "**🔍 Nivel de similitud para clasificación**",
+        options=[0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0],
+        index=None,
+        placeholder="Seleccione o busque...",
+        help="Elija el umbral de confianza del modelo (valores más altos = resultados más precisos pero menos coincidencias)"
+    )
 
     # --- Selectbox con búsqueda combinada ---
     insumoCode = st.sidebar.selectbox(
@@ -2752,6 +2760,8 @@ if len(year)>=1:
         index=None,
         placeholder="Escriba (código o nombre)..."
     )
+    
+
 
 
     # Filtramos el DataFrame basado en los códigos seleccionados
@@ -2767,7 +2777,7 @@ if len(year)>=1:
         ])
                 
         df_filtrado_pre = dfY[dfY["Codigo Insumo"].isin([insumoCode])].copy() #filtrado por codigo de insumo
-        df_filtrado=df_filtrado_pre[df_filtrado_pre['Score']>=0.8].copy() #ajusto el score para que solo muestre los que tienen 0.8 o mas    
+        df_filtrado=df_filtrado_pre[df_filtrado_pre['Score']>=score_option[0]].copy() #ajusto el score para que solo muestre los que tienen 0.8 o mas    
         current_group=dfCI[dfCI["Grupo"]==int(df_filtrado['Grupo'].iloc[0])].copy()
         # Obtenemos las variedades solo para los códigos seleccionados
         #orden de las variedades
