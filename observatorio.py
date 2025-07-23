@@ -2757,7 +2757,7 @@ if len(year)>=1:
         "🔍 Buscar por código o descripción:",
         options=codigos_insumo,
         format_func=lambda x: f"{x} - {codigo_a_descripcion.get(x, 'Sin descripción')}",
-        index=None,
+        index=1,
         placeholder="Escriba (código o nombre)..."
     )
     
@@ -2777,7 +2777,7 @@ if len(year)>=1:
         ])
                 
         df_filtrado_pre = dfY[dfY["Codigo Insumo"].isin([insumoCode])].copy() #filtrado por codigo de insumo
-        df_filtrado=df_filtrado_pre[df_filtrado_pre['Score']>=score_option[0]].copy() #ajusto el score para que solo muestre los que tienen 0.8 o mas    
+        df_filtrado=df_filtrado_pre[df_filtrado_pre['Score']>=score_option ].copy() #ajusto el score para que solo muestre los que tienen 0.8 o mas    
         current_group=dfCI[dfCI["Grupo"]==int(df_filtrado['Grupo'].iloc[0])].copy()
         # Obtenemos las variedades solo para los códigos seleccionados
         #orden de las variedades
