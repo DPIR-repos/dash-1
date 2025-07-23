@@ -2766,7 +2766,8 @@ if len(year)>=1:
             " **Análisis** 🅰️🅱️©️"
         ])
                 
-        df_filtrado = dfY[dfY["Codigo Insumo"].isin([insumoCode])].copy() #filtrado por codigo de insumo    
+        df_filtrado_pre = dfY[dfY["Codigo Insumo"].isin([insumoCode])].copy() #filtrado por codigo de insumo
+        df_filtrado=df_filtrado_pre[df_filtrado_pre['Score']>=0.8].copy() #ajusto el score para que solo muestre los que tienen 0.8 o mas    
         current_group=dfCI[dfCI["Grupo"]==int(df_filtrado['Grupo'].iloc[0])].copy()
         # Obtenemos las variedades solo para los códigos seleccionados
         #orden de las variedades
