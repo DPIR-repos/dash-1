@@ -3497,14 +3497,14 @@ if len(year)>=1:
 
         # Widget para selección de formato
         formato_descarga = st.sidebar.radio(
-            "📤 Descargar info. por código:",
+            "📤 Descargar info. completa por año seleccionado:",
             options=["CSV", "TXT", "Excel (XLSX)"],
             index=0,
             horizontal=True,
             key="formato_descarga"
         )
 
-        if df_filtrado is not None:
+        if dfY is not None:
             # Renombrar columnas
             change_columns = {
                 'Localidad Oferente': 'Municipio Oferente',
@@ -3512,7 +3512,7 @@ if len(year)>=1:
                 'Localidad Comprador': 'Municipio Comprador',
                 'Region Comprador': 'Departamento Comprador'
             }
-            df_filtrado_2 = df_filtrado.rename(columns=change_columns).copy()
+            df_filtrado_2 = dfY.rename(columns=change_columns).copy()
             
             # Preparar datos según formato seleccionado
             if formato_descarga == "CSV":
