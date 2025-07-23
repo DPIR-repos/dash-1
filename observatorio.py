@@ -3512,7 +3512,7 @@ if len(year)>=1:
                 'Localidad Comprador': 'Municipio Comprador',
                 'Region Comprador': 'Departamento Comprador'
             }
-            df_filtrado_2 = df_filtrado.rename(columns=change_columns).copy()
+            df_filtrado_2 = df_filtrado_pre.rename(columns=change_columns).copy()
             
             # Preparar datos según formato seleccionado
             if formato_descarga == "CSV":
