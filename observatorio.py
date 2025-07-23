@@ -3504,7 +3504,7 @@ if len(year)>=1:
             key="formato_descarga"
         )
 
-        if dfY is not None:
+        if df_filtrado is not None:
             # Renombrar columnas
             change_columns = {
                 'Localidad Oferente': 'Municipio Oferente',
