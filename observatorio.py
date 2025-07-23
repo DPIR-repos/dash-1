@@ -2745,7 +2745,7 @@ if len(year)>=1:
     codigo_a_descripcion = dict(zip(df_codigos_desc['Codigo Insumo'], df_codigos_desc['Insumo Match']))
     
     score_option = st.sidebar.slider(
-        "**🔍 Nivel de similitud para clasificación**",
+        "**Nivel de similitud para clasificación**",
         min_value=0.7,
         max_value=1.0,
         value=None if st.session_state.get('first_run', True) else 0.8,  # Valor inicial (None en primera ejecución)
