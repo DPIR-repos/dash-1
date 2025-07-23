@@ -2744,13 +2744,20 @@ if len(year)>=1:
     )
     codigo_a_descripcion = dict(zip(df_codigos_desc['Codigo Insumo'], df_codigos_desc['Insumo Match']))
     
-    score_option = st.sidebar.selectbox(
+    score_option = st.sidebar.slider(
         "**🔍 Nivel de similitud para clasificación**",
-        options=[0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0],
-        index=None,
-        placeholder="Seleccione o busque...",
-        help="Elija el umbral de confianza del modelo (valores más altos = resultados más precisos pero menos coincidencias)"
+        min_value=0.7,
+        max_value=1.0,
+        value=None if st.session_state.get('first_run', True) else 0.8,  # Valor inicial (None en primera ejecución)
+        step=0.01,
+        format="%.2f",  # Muestra 2 decimales
+        help="""Elija el umbral de confianza del modelo
+        (valores más altos = resultados más precisos pero menos coincidencias).
+        Arrastre el control o use las flechas para ajustar."""
     )
+
+    # Actualizar estado para recordar que ya no es la primera ejecución
+    st.session_state.first_run = False
 
     # --- Selectbox con búsqueda combinada ---
     insumoCode = st.sidebar.selectbox(
