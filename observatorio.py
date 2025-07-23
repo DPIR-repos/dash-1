@@ -2960,7 +2960,7 @@ if len(year)>=1:
                         'Localidad Comprador':'Municipio Comprador','Region Comprador': 'Departamento Comprador'}
                 df_filtrado_2=df_filtrado.rename(columns=change_columns).copy()
                 st.dataframe(df_filtrado_2,hide_index=True)    
-                st.markdown(""" **Nota:** Esta base de datos incluye únicamente insumos con un score ≥ 0.8. Todas las estadísticas y métricas mostradas aplican este mismo criterio. Si deseas consultar insumos con score ≥ 0.7, dirígete a la sección 
+                st.markdown(f""" **Nota:** Esta base de datos incluye únicamente insumos con un score ≥ {score_option}. Todas las estadísticas y métricas mostradas aplican este mismo criterio. Si deseas consultar insumos con score ≥ 0.7, dirígete a la sección 
                             **'Descargar información completa por código'** en la barra lateral izquierda.
                             """)
                 
