@@ -3210,26 +3210,26 @@ if len(year)>=1:
                                     col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05]) 
                                     # Botón para gráficos
                                     with col1bot:
-                                        st.markdown("**Evolucion de precios mensuales**")
+                                        st.markdown("**Evolucion de precios mensuales con corrección por inflación**")
                                     with col2bot:
-                                        if st.button("📊", key=f"toggle_variedad_plot_EVP_{v}_{idx}", help="""Mostrar gráficos """):
-                                            st.session_state.show_variedad_plots_EVP = not st.session_state.get("show_variedad_plots_EVP", False)
-                                            st.session_state.show_variedad_table_EVP = False  # Asegurar que la tabla se oculte
+                                        if st.button("📊", key=f"toggle_variedad_plot_EVP_IF_{v}_{idx}", help="""Mostrar gráficos """):
+                                            st.session_state.show_variedad_plots_EVP_IF = not st.session_state.get("show_variedad_plots_EVP_IF", False)
+                                            st.session_state.show_variedad_table_EVP_IF = False  # Asegurar que la tabla se oculte
                                     
                                     # Botón para tablas
                                     with col3bot:
-                                        if st.button("🖽", key=f"toggle_variedad_table_EVP_{v}_{idx}", help="""Mostrar tabla de datos """):
-                                            st.session_state.show_variedad_table_EVP = not st.session_state.get("show_variedad_table_EVP", False)
-                                            st.session_state.show_variedad_plots_EVP = False  # Asegurar que los gráficos se oculten
+                                        if st.button("🖽", key=f"toggle_variedad_table_EVP_IF_{v}_{idx}", help="""Mostrar tabla de datos """):
+                                            st.session_state.show_variedad_table_EVP_IF = not st.session_state.get("show_variedad_table_EVP_IF", False)
+                                            st.session_state.show_variedad_plots_EVP_IF = False  # Asegurar que los gráficos se oculten
                                     
                                     # Mostrar gráficos si está activo
-                                    if st.session_state.get("show_variedad_plots_EVP", True):
+                                    if st.session_state.get("show_variedad_plots_EVP_IF", True):
                                         # Mostrar el gráfico (corregido el nombre de la variable)
-                                        st.plotly_chart(figEvP, use_container_width=True, key=f"evolucion_{v}_{idx}")
+                                        st.plotly_chart(figEvP, use_container_width=True, key=f"evolucion_IF_{v}_{idx}")
                                         
-                                    if st.session_state.get("show_variedad_table_EVP", True):
+                                    if st.session_state.get("show_variedad_table_EVP_IF", True):
                                         # Mostrar el gráfico (corregido el nombre de la variable)
-                                        st.dataframe(dfEvP, hide_index=True)                                    
+                                        st.dataframe(dfEvP, hide_index=True, key=f"EVP_IF_{v}_{idx}")                                    
                                 else:
                                     st.error("No se pudo general el gráfico")
                         
