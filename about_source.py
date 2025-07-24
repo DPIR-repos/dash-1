@@ -1,84 +1,25 @@
 import streamlit as st
 from pathlib import Path
 import os
-import sys
+import pandas as pd
 
 def resource_path(file_path, local_folder_name=None):
     """
-    Busca un archivo en múltiples ubicaciones, incluyendo rutas con '_internal'.
-    Compatible con PyInstaller en modos OneFile y OneDirectory.
-    
-    Args:
-        file_path (str/Path): Ruta original del archivo
-        local_folder_name (str, opcional): Nombre del directorio base donde buscar.
-                                          Si None, se determina automáticamente.
-    
-    Returns:
-        Path: Ruta del archivo encontrado o la original si no se encontró
+    Función para manejar rutas de archivos en diferentes entornos (desarrollo/empaquetado)
     """
-    # Convertir a Path si es necesario
     path_obj = Path(file_path) if isinstance(file_path, str) else file_path
     
-    # 1. Intentar con la ruta original primero
     if path_obj.exists():
         return path_obj
     
-    # 2. Determinar el directorio base según el modo de empaquetado
-    if getattr(sys, 'frozen', False):
-        # Aplicación empaquetada
-        if '_MEIPASS' in os.environ:
-            # Modo OneFile - los recursos están en _MEIPASS
-            base_dir = Path(os.environ['_MEIPASS'])
-        else:
-            # Modo OneDirectory - usar directorio del ejecutable
-            base_dir = Path(sys.executable).parent
-    else:
-        # Modo desarrollo - usar directorio del script
-        base_dir = Path(__file__).parent
+    base_dir = Path(__file__).parent
+    possible_paths = [
+        base_dir / path_obj.name,
+        base_dir / path_obj,
+        base_dir / '_internal' / path_obj,
+        Path.cwd() / path_obj
+    ]
     
-    # 3. Si se especificó un local_folder_name, usarlo como referencia
-    if local_folder_name:
-        parts = list(path_obj.parts)
-        try:
-            base_index = parts.index(local_folder_name)
-            base_parts = parts[:base_index+1]
-            remaining_parts = parts[base_index+1:]
-            new_parts = base_parts + ['_internal'] + remaining_parts
-            new_path = Path(*new_parts)
-            if new_path.exists():
-                return new_path
-        except ValueError:
-            pass  # Continuar con la lógica normal si no se encuentra el folder
-    
-    # 4. Intentar rutas alternativas (versión corregida)
-    possible_paths = []
-    
-    # Ruta directa desde el directorio base
-    possible_paths.append(base_dir / path_obj.name)
-    
-    # Ruta manteniendo estructura pero desde base_dir
-    if not path_obj.is_absolute():
-        possible_paths.append(base_dir / path_obj)
-    else:
-        possible_paths.append(path_obj)
-    
-    # Ruta con _internal (versión simplificada para evitar errores de sintaxis)
-    if not path_obj.is_absolute():
-        possible_paths.append(base_dir / '_internal' / path_obj)
-    else:
-        try:
-            base_index = path_obj.parts.index(base_dir.name)
-            new_parts = (path_obj.parts[:base_index+1] + ('_internal',) + 
-                        path_obj.parts[base_index+1:])
-            possible_paths.append(Path(*new_parts))
-        except ValueError:
-            pass
-    
-    # Ruta temporal de OneFile (si aplica)
-    if getattr(sys, 'frozen', False) and '_MEIPASS' in os.environ:
-        possible_paths.append(base_dir / '_internal' / path_obj.name)
-    
-    # Filtrar paths válidos y verificar existencia
     for test_path in possible_paths:
         try:
             if test_path.exists():
@@ -86,15 +27,12 @@ def resource_path(file_path, local_folder_name=None):
         except (TypeError, AttributeError):
             continue
     
-    # 5. Como último recurso, intentar con el directorio de trabajo actual
-    test_path = Path.cwd() / path_obj if not path_obj.is_absolute() else path_obj
-    if test_path.exists():
-        return test_path
-    
-    # Si no se encontró en ninguna ruta, devolver la original
     return path_obj
 
 def show():
+    # Configuración de la página
+    st.set_page_config(page_title="Estructura de la base de datos", layout="wide")
+    
     # Logo del INE
     st.sidebar.markdown(
         """
@@ -105,74 +43,114 @@ def show():
         unsafe_allow_html=True
     )
     
+    # Logo de la aplicación
     current_folder = Path(os.getcwd())
-    soruce_folder = "source_data"
-    st.sidebar.markdown(" ")
-    st.sidebar.image(resource_path(current_folder/soruce_folder/"DPIR_logo_2.png"))
+    source_folder = "source_data"
+    st.sidebar.image(resource_path(current_folder/source_folder/"DPIR_logo_2.png"))
     
-    # Tabla de contenido en el sidebar
-    st.sidebar.markdown("## Tabla de Contenido")
-    st.sidebar.markdown("""
-    - [Acerca del Observatorio de Precios](#acerca-del-observatorio-de-precios)
-    - [Funcionalidades principales](#funcionalidades-principales)
-    - [Metodología](#metodología)
-    - [Detalles técnicos](#detalles-técnicos-de-los-gráficos)
-    - [Cómo usar la aplicación](#cómo-usar-la-aplicación)
+    # Título principal
+    st.title("📊 Estructura de la base de datos de precios")
+    st.markdown("""
+    Documentación técnica del archivo CSV que contiene los precios históricos de insumos adjudicados en Guatecompras.
     """)
     
-    st.title("📚 Documentación Técnica")
-    
+    # Descripción detallada del archivo CSV
     st.markdown("""
-    <a id="acerca-del-observatorio-de-precios"></a>
-    ## Acerca del Observatorio de Precios
+    ## Archivo principal: precios_insumos.csv
     
-    Esta aplicación permite analizar los precios de insumos adjudicados en Guatecompras,
-    con ajustes por inflación y visualizaciones interactivas.
-    """, unsafe_allow_html=True)
+    **Descripción**: 
+    Este dataset contiene todos los registros históricos de precios de insumos adjudicados a través del sistema Guatecompras,
+    con información detallada sobre productos, ubicación, fechas y montos.
+    """)
     
+    # Estructura de columnas
     st.markdown("""
-    <a id="funcionalidades-principales"></a>
-    ### Funcionalidades principales:
-    - Análisis de precios por insumo y variedad
-    - Corrección por inflación (nacional/regional)
-    - Visualizaciones geográficas por departamento
-    - Series temporales de evolución de precios
-    """, unsafe_allow_html=True)
+    ### Estructura de columnas:
     
+    | Nombre Columna | Tipo de Dato | Descripción | Ejemplo |
+    |---------------|--------------|-------------|---------|
+    | CODIGO_CATEGORIA | Texto | Código de categoría del insumo | 210101 |
+    | DESCRIPCION_CATEGORIA | Texto | Descripción de la categoría | "MEDICAMENTOS" |
+    | CODIGO_INSUMO | Texto | Código único del insumo | 2101010010 |
+    | DESCRIPCION_INSUMO | Texto | Nombre descriptivo completo del insumo | "PARACETAMOL TABLETA 500MG" |
+    | VARIEDAD | Texto | Subtipo o variante del insumo | "CAJA X 100 TABLETAS" |
+    | UNIDAD_MEDIDA | Texto | Unidad de medida del insumo | "CAJA", "KG", "LT" |
+    | PRECIO_UNITARIO | Decimal | Precio por unidad de medida | 125.50 |
+    | CANTIDAD_ADJUDICADA | Decimal | Cantidad total adjudicada | 50.0 |
+    | MONTO_TOTAL | Decimal | Precio total (PRECIO_UNITARIO * CANTIDAD_ADJUDICADA) | 6275.00 |
+    | FECHA_ADJUDICACION | Fecha | Fecha de adjudicación (YYYY-MM-DD) | 2022-05-15 |
+    | DEPARTAMENTO | Texto | Departamento donde se adjudicó | "GUATEMALA" |
+    | MUNICIPIO | Texto | Municipio donde se adjudicó | "MIXCO" |
+    | PROVEEDOR | Texto | Nombre del proveedor adjudicado | "FARMACIA XYZ, S.A." |
+    | CODIGO_PROCESO | Texto | Código único del proceso de compra | "CG-001-2022" |
+    | ANIO | Entero | Año de adjudicación (derivado de fecha) | 2022 |
+    | MES | Entero | Mes de adjudicación (derivado de fecha) | 5 |
+    """)
+    
+    # Sección de usos y aplicaciones
     st.markdown("""
-    <a id="metodología"></a>
-    ### Metodología:
-    Los precios se calculan usando la media geométrica ponderada por cantidad ofertada,
-    con intervalos de confianza ajustables.
-    """, unsafe_allow_html=True)
+    ## Aplicaciones principales
     
-    with st.expander("📊 Detalles técnicos de los gráficos"):
+    ### 1. Análisis de distribución de precios
+    - Histogramas de frecuencia de precios por insumo
+    - Comparación de rangos de precios entre variedades
+    - Identificación de valores atípicos
+    
+    ### 2. Evolución temporal
+    - Tendencia de precios mensuales/anuales
+    - Comparación pre-pandemia/post-pandemia
+    - Efectos de inflación en precios
+    
+    ### 3. Análisis geográfico
+    - Mapeo de precios por departamento/municipio
+    - Identificación de zonas con mayores precios
+    - Diferencias urbano/rural
+    
+    ### 4. Benchmarking de proveedores
+    - Comparación de precios entre proveedores
+    - Análisis de concentración de mercado
+    - Detección de posibles colusiones
+    """)
+    
+    # Sección técnica
+    with st.expander("📝 Notas técnicas y metadatos"):
         st.markdown("""
-        <a id="detalles-técnicos-de-los-gráficos"></a>
-        - **Histogramas**: Muestran distribución de precios con KDE (Kernel Density Estimation). El número de bins para el histograma se determina
-                           siguiendo la regla de Sturges, cuya fórmula matematica es $$N_{bins}=1+log_{2}(M)$$ donde $$M$$ es el número total de observaciones. 
-                           En este caso el número total de observaciones es igual a la suma del número total de unidades ofertadas.  
-        - **Mapas**: Coropleticos por departamento con precios promedio
-        - **Series temporales**: Evolución mensual con bandas de desviación estándar
-        """, unsafe_allow_html=True)
+        - **Codificación de archivo**: UTF-8
+        - **Separador de campos**: Coma (,)
+        - **Formato fechas**: ISO 8601 (YYYY-MM-DD)
+        - **Precisión decimal**: 2 dígitos para montos
+        - **Periodicidad de actualización**: Mensual
+        - **Cobertura temporal**: Desde enero 2015 hasta actualidad
+        - **Cobertura geográfica**: Todos los departamentos de Guatemala
+        """)
     
-    with st.expander("🛠️ Cómo usar la aplicación"):
-        st.markdown("""
-        <a id="cómo-usar-la-aplicación"></a>
-        1. Seleccione el año de interés en el sidebar
-        2. Elija el código de insumo (puede buscar por código o descripción)
-        3. Filtre por variedad si es necesario
-        4. Active corrección por inflación si lo requiere
-        5. Explore los gráficos y tablas generadas
-        """, unsafe_allow_html=True)
-        
-    col1Logo, col2Logo = st.columns([9, 1])
-
-    with col2Logo:
+    # Ejemplo de datos
+    with st.expander("🖥️ Ejemplo de registros (estructura)"):
+        sample_data = {
+            "CODIGO_CATEGORIA": ["210101", "210101"],
+            "DESCRIPCION_CATEGORIA": ["MEDICAMENTOS", "MEDICAMENTOS"],
+            "CODIGO_INSUMO": ["2101010010", "2101010015"],
+            "DESCRIPCION_INSUMO": ["PARACETAMOL TAB 500MG", "IBUPROFENO TAB 400MG"],
+            "VARIEDAD": ["CAJA X 100 TAB", "CAJA X 50 TAB"],
+            "UNIDAD_MEDIDA": ["CAJA", "CAJA"],
+            "PRECIO_UNITARIO": [125.50, 89.75],
+            "CANTIDAD_ADJUDICADA": [50, 30],
+            "MONTO_TOTAL": [6275.00, 2692.50],
+            "FECHA_ADJUDICACION": ["2022-05-15", "2022-06-20"],
+            "DEPARTAMENTO": ["GUATEMALA", "QUETZALTENANGO"],
+            "MUNICIPIO": ["MIXCO", "QUETZALTENANGO"],
+            "PROVEEDOR": ["FARMACIA XYZ, S.A.", "DISTRIBUIDORA ABC"],
+            "CODIGO_PROCESO": ["CG-001-2022", "CG-045-2022"],
+            "ANIO": [2022, 2022],
+            "MES": [5, 6]
+        }
+        st.dataframe(pd.DataFrame(sample_data))
+    
+    # Pie de página con logo
+    col1, col2 = st.columns([9, 1])
+    with col2:
         st.markdown("")
-        st.markdown("")
-        st.markdown("")
-        st.image(resource_path(current_folder / soruce_folder / "DPIR_logo_2.png"), width=120)
+        st.image(resource_path(current_folder / source_folder / "DPIR_logo_2.png"), width=120)
 
 # Llamada a la función principal
 show()
