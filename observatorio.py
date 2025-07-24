@@ -3207,7 +3207,29 @@ if len(year)>=1:
                             else:
                                 figEvP, dfEvp=plot_prices_monts(df_v,True, inflacion_year, anio_fin, mes_fin,inflacion_choice)
                                 if figEvP:
-                                    st.plotly_chart(figEvP, use_container_width=True, key=f"evolucion_{v}_{idx}")
+                                    col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05]) 
+                                    # Botón para gráficos
+                                    with col1bot:
+                                        st.markdown("**Evolucion de precios mensuales**")
+                                    with col2bot:
+                                        if st.button("📊", key=f"toggle_variedad_plot_EVP_{v}_{idx}", help="""Mostrar gráficos """):
+                                            st.session_state.show_variedad_plots_EVP = not st.session_state.get("show_variedad_plots_EVP", False)
+                                            st.session_state.show_variedad_table_EVP = False  # Asegurar que la tabla se oculte
+                                    
+                                    # Botón para tablas
+                                    with col3bot:
+                                        if st.button("🖽", key=f"toggle_variedad_table_EVP_{v}_{idx}", help="""Mostrar tabla de datos """):
+                                            st.session_state.show_variedad_table_EVP = not st.session_state.get("show_variedad_table_EVP", False)
+                                            st.session_state.show_variedad_plots_EVP = False  # Asegurar que los gráficos se oculten
+                                    
+                                    # Mostrar gráficos si está activo
+                                    if st.session_state.get("show_variedad_plots_EVP", True):
+                                        # Mostrar el gráfico (corregido el nombre de la variable)
+                                        st.plotly_chart(figEvP, use_container_width=True, key=f"evolucion_{v}_{idx}")
+                                        
+                                    if st.session_state.get("show_variedad_table_EVP", True):
+                                        # Mostrar el gráfico (corregido el nombre de la variable)
+                                        st.dataframe(dfEvP, hide_index=True)                                    
                                 else:
                                     st.error("No se pudo general el gráfico")
                         
