@@ -1337,7 +1337,7 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
     # Personalizar el layout del gráfico
     
     fig.update_layout(
-        title=None,
+        title=" ",
         xaxis_title='Período',
         yaxis_title='Precio Promedio [Q]',
         showlegend=True,
