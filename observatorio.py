@@ -1129,7 +1129,7 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
     # Crear columna combinada de Mes-Año si hay múltiples años
     if multi_year:
         df.loc[:, 'Mes_Año'] = df.apply(
-            lambda x: f"{meses_dic[x['Mes Publicacion']}-{x['Anio Publicacion']}", 
+            lambda x: f"{meses_dic[x['Mes Publicacion']]}-{x['Anio Publicacion']}", 
             axis=1
         )
         grupos = df.groupby(['Mes Publicacion', 'Anio Publicacion', 'Mes_Año'], group_keys=False)
