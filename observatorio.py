@@ -3208,7 +3208,7 @@ if len(year)>=1:
                                     with col1bot:
                                         st.markdown("**Evolucion de precios mensuales con corrección por inflación**")
                                         if anio_fin is None:
-                                            st.warning("Seleccione un una fecha para aplicar la corrección por inflacion")
+                                            st.error("Seleccione un una fecha para aplicar la corrección por inflacion")
                                     with col2bot:
                                         if st.button("📊", key=f"toggle_variedad_plot_EVP_IF_{v}_{idx}", help="""Mostrar gráficos """):
                                             st.session_state.show_variedad_plots_EVP_IF = not st.session_state.get("show_variedad_plots_EVP_IF", False)
