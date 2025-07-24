@@ -3205,8 +3205,8 @@ if len(year)>=1:
                                 else:
                                     st.error("No se pudo general el gráfico")
                             else:
-                                figEvP, dfEvp=plot_prices_monts(df_v,True, inflacion_year, anio_fin, mes_fin,inflacion_choice)
-                                st.dataframe(dfEvP)
+                                figEvP, dfEvP_IF=plot_prices_monts(df_v,True, inflacion_year, anio_fin, mes_fin,inflacion_choice)
+                                #st.dataframe(dfEvP_IF)
                                 if figEvP:
                                     col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05]) 
                                     # Botón para gráficos
@@ -3230,7 +3230,7 @@ if len(year)>=1:
                                         
                                     if st.session_state.get("show_variedad_table_EVP_IF", True):
                                         # Mostrar el gráfico (corregido el nombre de la variable)
-                                        st.dataframe(dfEvP, hide_index=True, key=f"EVP_IF_{v}_{idx}")                                    
+                                        st.dataframe(dfEvP_IF, hide_index=True, key=f"EVP_IF_{v}_{idx}")                                    
                                 else:
                                     st.error("No se pudo general el gráfico")
                         
