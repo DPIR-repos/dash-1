@@ -3206,6 +3206,7 @@ if len(year)>=1:
                                     st.error("No se pudo general el gráfico")
                             else:
                                 figEvP, dfEvp=plot_prices_monts(df_v,True, inflacion_year, anio_fin, mes_fin,inflacion_choice)
+                                st.dataframe(dfEvP)
                                 if figEvP:
                                     col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05]) 
                                     # Botón para gráficos
