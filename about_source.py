@@ -142,7 +142,7 @@ def show():
             "Monto ofertado": [29500.0, 840.0],
             "Comprador": ["INSTITUTO GUATEMALTECO DE SEGURIDAD SOCIAL", "MINISTERIO DE LA DEFENSA NACIONAL"]
         }
-        st.dataframe(pd.DataFrame(sample_data))
+        st.dataframe(pd.DataFrame(sample_data), hide_index=True)
     
     # Pie de página con logo (copiado exactamente del ejemplo)
     col1, col2 = st.columns([9, 1])
