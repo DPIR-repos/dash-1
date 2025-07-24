@@ -1060,43 +1060,92 @@ def plot_map_unidades_departamentos(df_ventas, dfGeoDATA):
     return fig_map, df_resultados
 
 def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=None, mes_fin=None, Inflacion_Choice=None):
+    """
+    Genera un gráfico de evolución de precios mensuales y devuelve un DataFrame con los datos calculados.
+    
+    Esta función procesa datos de ventas para calcular y visualizar la evolución de precios mensuales,
+    con opción de ajustar por inflación. Devuelve tanto el gráfico como un DataFrame con los datos usados.
+    
+    Parámetros:
+    -----------
+    df_ventas_va : pandas.DataFrame
+        DataFrame con los datos de ventas. Debe contener las columnas:
+        - 'Anio Publicacion': Año de publicación
+        - 'Mes Publicacion': Mes de publicación (numérico 1-12)
+        - 'Precio unitario': Precio del producto
+        - 'Cantidad Ofertada': Cantidad vendida
+        - 'Region Oferente' (solo si se usa inflación regional)
+        
+    Inflacion : bool, opcional (default=False)
+        Si es True, aplica corrección por inflación a los precios.
+        
+    dfInflacion : pandas.DataFrame, opcional
+        DataFrame con datos de inflación. Requerido si Inflacion=True.
+        
+    anio_fin : int, opcional
+        Año de referencia para el ajuste por inflación. Requerido si Inflacion=True.
+        
+    mes_fin : int, opcional
+        Mes de referencia para el ajuste por inflación (1-12). Requerido si Inflacion=True.
+        
+    Inflacion_Choice : str, opcional
+        Tipo de inflación a aplicar ('republica' o 'regional').
+        Requerido si Inflacion=True.
+    
+    Retorna:
+    --------
+    tuple (plotly.graph_objects.Figure, pandas.DataFrame)
+        - Figura con el gráfico de evolución de precios
+        - DataFrame con los datos usados en el gráfico, que contiene:
+            * Periodo: Mes-Año del dato
+            * Precio_Promedio: Media geométrica de precios
+            * Desviacion_Precios: Desviaciín estándar de precios
+            * Precio_Ajustado: Media geométrica de precios ajustados (si aplica)
+            * Desviacion_Ajustados: Desviación estándar de precios ajustados (si aplica)
+    """
+    
     # Hacer una copia explícita del DataFrame para evitar warnings
     df = df_ventas_va.copy()
     
-    # Diccionario de meses
+    # Diccionario de meses (abreviaturas y nombres completos)
     meses_dic = {
         1: 'Ene', 2: 'Feb', 3: 'Mar', 4: 'Abr', 
         5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Ago',
         9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dic'
     }
 
-    meses_long = {1:'Enero', 2:'Febrero', 3:'Marzo', 4:'Abril', 
-                  5:'Mayo', 6:'Junio', 7:'Julio', 8:'Agosto', 
-                  9:'Septiembre', 10:'Octubre', 11:'Noviembre', 12:'Diciembre'}
+    meses_long = {
+        1:'Enero', 2:'Febrero', 3:'Marzo', 4:'Abril', 
+        5:'Mayo', 6:'Junio', 7:'Julio', 8:'Agosto', 
+        9:'Septiembre', 10:'Octubre', 11:'Noviembre', 12:'Diciembre'
+    }
 
     meses_dic_inverso = {v: k for k, v in meses_dic.items()}
 
-    # Verificar si hay múltiples años
+    # Verificar si hay múltiples años en los datos
     years = df['Anio Publicacion'].unique()
     multi_year = len(years) > 1
     
     # Crear columna combinada de Mes-Año si hay múltiples años
     if multi_year:
         df.loc[:, 'Mes_Año'] = df.apply(
-            lambda x: f"{meses_dic[x['Mes Publicacion']]}-{x['Anio Publicacion']}", 
+            lambda x: f"{meses_dic[x['Mes Publicacion']}-{x['Anio Publicacion']}", 
             axis=1
         )
         grupos = df.groupby(['Mes Publicacion', 'Anio Publicacion', 'Mes_Año'], group_keys=False)
     else:
         grupos = df.groupby('Mes Publicacion', group_keys=False)
     
-    # Calcular estadísticas para cada grupo
+    # Inicializar listas para almacenar resultados
     precios_promedio = []
     precios_promedio_ajustados = []
     stdv_precios_prom = []
     stdv_precios_ajustados = []
     etiquetas = []
+    meses_nums = []
+    anios = []
     
+    # Procesar cada grupo (mes o mes-año)
     for nombre, grupo in grupos:
         if multi_year:
             mes_num, year, etiqueta = nombre
@@ -1106,7 +1155,7 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
             year = years[0]
         
         try:
-            # Expandir precios según cantidad ofertada (método más eficiente)
+            # Expandir precios según cantidad ofertada (para ponderar por volumen)
             precios_expandidos = []
             cantidades = grupo['Cantidad Ofertada'].astype(int).values
             precios = grupo['Precio unitario'].values
@@ -1116,21 +1165,23 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
             
             precios_expandidos = np.array(precios_expandidos)
             
+            # Aplicar corrección por inflación si se solicita
             if Inflacion and dfInflacion is not None and anio_fin is not None and mes_fin is not None and Inflacion_Choice is not None:
-                if unidecode(Inflacion_Choice.lower())=='republica':
-                    # Aplicar corrección por inflación a cada precio expandido (vectorizado)
-                    anios = grupo['Anio Publicacion'].values
-                    meses = grupo['Mes Publicacion'].values
+                if unidecode(Inflacion_Choice.lower()) == 'republica':
+                    # Ajuste por inflación a nivel nacional
+                    anios_grupo = grupo['Anio Publicacion'].values
+                    meses_grupo = grupo['Mes Publicacion'].values
                     
                     precios_ajustados = []
-                    for precio, anio, mes, cantidad in zip(precios, anios, meses, cantidades):
+                    for precio, anio, mes, cantidad in zip(precios, anios_grupo, meses_grupo, cantidades):
                         precio_ajustado = fix_price_inflacion_mensual(
                             dfInflacion,
                             precio,
                             anio,
                             mes,
                             anio_fin,
-                            mes_fin, Inflacion_Choice
+                            mes_fin, 
+                            Inflacion_Choice
                         )
                         precios_ajustados.extend([precio_ajustado] * cantidad)
                     
@@ -1142,22 +1193,24 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
                     
                     precios_promedio_ajustados.append(float(precio_prom_ajustado))
                     stdv_precios_ajustados.append(float(std_dev_ajustado))
-                # INFLACION REGIONAL    
-                if unidecode(Inflacion_Choice.lower())=='regional':
-                    # Aplicar corrección por inflación a cada precio expandido (vectorizado)
-                    anios = grupo['Anio Publicacion'].values
-                    meses = grupo['Mes Publicacion'].values
-                    depts = grupo['Region Oferente'].values #en esta fila estan los nombres de los departamentos
+                
+                elif unidecode(Inflacion_Choice.lower()) == 'regional':
+                    # Ajuste por inflación regional (por departamento)
+                    anios_grupo = grupo['Anio Publicacion'].values
+                    meses_grupo = grupo['Mes Publicacion'].values
+                    depts = grupo['Region Oferente'].values
                     
                     precios_ajustados = []
-                    for precio, anio, mes, cantidad, depa in zip(precios, anios, meses, cantidades, depts):
+                    for precio, anio, mes, cantidad, depa in zip(precios, anios_grupo, meses_grupo, cantidades, depts):
                         precio_ajustado = fix_price_inflacion_mensual(
                             dfInflacion,
                             precio,
                             anio,
                             mes,
                             anio_fin,
-                            mes_fin, Inflacion_Choice, depa
+                            mes_fin, 
+                            Inflacion_Choice, 
+                            depa
                         )
                         precios_ajustados.extend([precio_ajustado] * cantidad)
                     
@@ -1170,49 +1223,65 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
                     precios_promedio_ajustados.append(float(precio_prom_ajustado))
                     stdv_precios_ajustados.append(float(std_dev_ajustado))
             
-            # Calcular estadísticas de precios originales
+            # Calcular estadísticas de precios originales (media geométrica y desviación)
             precio_prom = gmean(precios_expandidos)
             std_dev = np.std(precios_expandidos)
             
             precios_promedio.append(float(precio_prom))
             stdv_precios_prom.append(float(std_dev))
             etiquetas.append(etiqueta)
+            meses_nums.append(mes_num)
+            anios.append(year)
             
         except Exception as e:
             print(f"Error procesando grupo {nombre}: {str(e)}")
             continue
     
-    # Ordenar por fecha cronológica
+    # Ordenar los datos cronológicamente
     if multi_year:
         if Inflacion and precios_promedio_ajustados:
             datos_ordenados = sorted(
-                zip(etiquetas, precios_promedio, stdv_precios_prom, precios_promedio_ajustados, stdv_precios_ajustados),
-                key=lambda x: (
-                    int(x[0].split('-')[1]),
-                    meses_dic_inverso[x[0].split('-')[0]]
-                )
+                zip(etiquetas, precios_promedio, stdv_precios_prom, precios_promedio_ajustados, stdv_precios_ajustados, meses_nums, anios),
+                key=lambda x: (x[6], x[5])  # Ordenar por año y luego por mes
             )
             etiquetas = [x[0] for x in datos_ordenados]
             precios_promedio = [x[1] for x in datos_ordenados]
             stdv_precios_prom = [x[2] for x in datos_ordenados]
             precios_promedio_ajustados = [x[3] for x in datos_ordenados]
             stdv_precios_ajustados = [x[4] for x in datos_ordenados]
+            meses_nums = [x[5] for x in datos_ordenados]
+            anios = [x[6] for x in datos_ordenados]
         else:
             datos_ordenados = sorted(
-                zip(etiquetas, precios_promedio, stdv_precios_prom),
-                key=lambda x: (
-                    int(x[0].split('-')[1]),
-                    meses_dic_inverso[x[0].split('-')[0]]
-                )
+                zip(etiquetas, precios_promedio, stdv_precios_prom, meses_nums, anios),
+                key=lambda x: (x[4], x[3])  # Ordenar por año y luego por mes
             )
             etiquetas = [x[0] for x in datos_ordenados]
             precios_promedio = [x[1] for x in datos_ordenados]
             stdv_precios_prom = [x[2] for x in datos_ordenados]
+            meses_nums = [x[3] for x in datos_ordenados]
+            anios = [x[4] for x in datos_ordenados]
+    
+    # Crear DataFrame con los resultados
+    data_dict = {
+        'Periodo': etiquetas,
+        'Mes': meses_nums,
+        'Anio': anios,
+        'Precio_Promedio': precios_promedio,
+        'Desviacion_Precios': stdv_precios_prom,
+    }
+    
+    if Inflacion and precios_promedio_ajustados:
+        data_dict['Precio_Ajustado'] = precios_promedio_ajustados
+        data_dict['Desviacion_Ajustados'] = stdv_precios_ajustados
+    
+    df_resultados = pd.DataFrame(data_dict)
     
     # Crear el gráfico
     fig = go.Figure()
     
     if Inflacion and dfInflacion is not None and anio_fin is not None and mes_fin is not None and precios_promedio_ajustados:
+        # Gráfico con datos ajustados y originales
         fig.add_trace(go.Scatter(
             x=etiquetas,
             y=precios_promedio_ajustados,
@@ -1246,15 +1315,8 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
                 width=3
             )
         ))
-        
-        #fig.add_trace(go.Scatter(
-        #    x=etiquetas,
-        #    y=precios_promedio,
-        #    mode='lines',
-        #    name='Media geométrica (original)',
-        #    line=dict(color=INEOrangeColors[0], width=3, dash='dot')
-        #))
     else:
+        # Gráfico solo con datos originales
         fig.add_trace(go.Scatter(
             x=etiquetas,
             y=precios_promedio,
@@ -1272,7 +1334,7 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
             )
         ))
     
-    # Personalizar el layout
+    # Personalizar el layout del gráfico
     title_suffix = ''
     if mes_fin is not None and multi_year:
         title_suffix = f" ({meses_long[mes_fin]}-{anio_fin})"
@@ -1288,8 +1350,7 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
         xaxis={'type': 'category'}
     )
     
-    return fig
-
+    return fig, df_resultados
 
 def plot_precio_vs_unidades_inflacion(df, Inflacion=False, dfInflacion=None, anio_fin=None, mes_fin=None, Inflacion_Choice=None):
     """
@@ -1880,8 +1941,8 @@ def plot_Hvariety(dfVariety, variedad, CL=95, Inflacion=False, dfInflacion=None,
         "Media aritmética", 
         "Desviación estándar",
         "Precio estimado KDE",
-        f"Precio mínimo {CL:.0f}% a CL",
-        f"Precio máximo {CL:.0f}% a CL"
+        f"Precio mínimo a {CL:.0f}% de CL",
+        f"Precio máximo a {CL:.0f}% de CL"
     ]
     
     # Calcular valores originales
@@ -3115,13 +3176,36 @@ if len(year)>=1:
                         
                         with col1Sec3:
                             if inflacion_month==None:
-                                figEvP=plot_prices_monts(df_v)
+                                figEvP, dfEvP=plot_prices_monts(df_v)
                                 if figEvP:
-                                    st.plotly_chart(figEvP, use_container_width=True, key=f"evolucion_{v}_{idx}")
+                                    col1bot, col2bot, col3bot = st.columns([0.90,0.05,0.05]) 
+                                    # Botón para gráficos
+                                    with col1bot:
+                                        st.markdown("**Evolucion de precios mensuales**")
+                                    with col2bot:
+                                        if st.button("📊", key=f"toggle_variedad_plot_EVP_{v}_{idx}", help="""Mostrar gráficos """):
+                                            st.session_state.show_variedad_plots_EVP = not st.session_state.get("show_variedad_plots_EVP", False)
+                                            st.session_state.show_variedad_table_EVP = False  # Asegurar que la tabla se oculte
+                                    
+                                    # Botón para tablas
+                                    with col3bot:
+                                        if st.button("🖽", key=f"toggle_variedad_table_EVP_{v}_{idx}", help="""Mostrar tabla de datos """):
+                                            st.session_state.show_variedad_table_EVP = not st.session_state.get("show_variedad_table_EVP", False)
+                                            st.session_state.show_variedad_plots_EVP = False  # Asegurar que los gráficos se oculten
+                                    
+                                    # Mostrar gráficos si está activo
+                                    if st.session_state.get("show_variedad_plots_EVP", True):
+                                        # Mostrar el gráfico (corregido el nombre de la variable)
+                                        st.plotly_chart(figEvP, use_container_width=True, key=f"evolucion_{v}_{idx}")
+                                    
+                                else:
+                                    st.error("No se pudo general el gráfico")
                             else:
-                                figEvP=plot_prices_monts(df_v,True, inflacion_year, anio_fin, mes_fin,inflacion_choice)
+                                figEvP, dfEvp=plot_prices_monts(df_v,True, inflacion_year, anio_fin, mes_fin,inflacion_choice)
                                 if figEvP:
                                     st.plotly_chart(figEvP, use_container_width=True, key=f"evolucion_{v}_{idx}")
+                                else:
+                                    st.error("No se pudo general el gráfico")
                         
                         with col2Sec3:
                             if inflacion_month is None:
