@@ -1335,14 +1335,9 @@ def plot_prices_monts(df_ventas_va, Inflacion=False, dfInflacion=None, anio_fin=
         ))
     
     # Personalizar el layout del gráfico
-    title_suffix = ''
-    if mes_fin is not None and multi_year:
-        title_suffix = f" ({meses_long[mes_fin]}-{anio_fin})"
-    elif not multi_year:
-        title_suffix = f" (Año {years[0]})"
     
     fig.update_layout(
-        title=f'Evolución de Precios Mensuales{" con corrección por inflación" if Inflacion_Choice else "" } {Inflacion_Choice} {title_suffix}',
+        title=None,
         xaxis_title='Período',
         yaxis_title='Precio Promedio [Q]',
         showlegend=True,
