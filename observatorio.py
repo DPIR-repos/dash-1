@@ -3178,7 +3178,7 @@ if len(year)>=1:
                                     with col1bot:
                                         st.markdown("**Evolucion de precios mensuales**")
                                         if inflacion_choice is not None:
-                                            st.warning("Seleccione la fecha hasta la que deseea aplicar la corrección por inflación")
+                                            st.warning(f"Seleccione la fecha hasta la que deseea aplicar la corrección por inflación {inflacion_choice}")
                                     with col2bot:
                                         if st.button("📊", key=f"toggle_variedad_plot_EVP_{v}_{idx}", help="""Mostrar gráficos """):
                                             st.session_state.show_variedad_plots_EVP = not st.session_state.get("show_variedad_plots_EVP", False)
