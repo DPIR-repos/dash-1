@@ -2820,7 +2820,7 @@ if len(year)>=1:
         "🔍 Buscar por código o descripción:",
         options=codigos_insumo,
         format_func=lambda x: f"{x} - {codigo_a_descripcion.get(x, 'Sin descripción')}",
-        index=1,
+        index=None,
         placeholder="Escriba (código o nombre)..."
     )
     
