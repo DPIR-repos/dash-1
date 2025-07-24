@@ -3197,6 +3197,10 @@ if len(year)>=1:
                                     if st.session_state.get("show_variedad_plots_EVP", True):
                                         # Mostrar el gráfico (corregido el nombre de la variable)
                                         st.plotly_chart(figEvP, use_container_width=True, key=f"evolucion_{v}_{idx}")
+                                        
+                                    if st.session_state.get("show_variedad_table_EVP", True):
+                                        # Mostrar el gráfico (corregido el nombre de la variable)
+                                        st.dataframe(dfEvP, hide_index=True)
                                     
                                 else:
                                     st.error("No se pudo general el gráfico")
