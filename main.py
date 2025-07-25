@@ -14,7 +14,7 @@ st.set_page_config(
 
 # Definición de las páginas
 pages = {
-    "Observatorio": [st.Page("observatorio.py", title="Observatorio de Precios")],
+    "Herramientas": [st.Page("observatorio.py", title="Observatorio de Precios"), st.Page("busquedas_personalizadas.py", title="Busquedas Personalizadas") ],
     "Documentación": [st.Page("documentacion.py", title="Documentación Técnica"), st.Page('about_source.py', title='Estructura de ficheros')],
 }
 
