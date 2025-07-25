@@ -69,7 +69,7 @@ def resource_path(file_path, local_folder_name=None):
 @st.cache_data
 def load_data_year(year):
     """Carga datos para un año específico"""
-    year_dir = Path("source_data") / "data_base_guatecompras" / f"{year}"
+    year_dir = Path("source_data") / "concatenate_data" / f"{year}"
     dir_path = resource_path(year_dir)
     
     try:
@@ -91,23 +91,6 @@ def load_data_year(year):
         raise FileNotFoundError(
             f"No se pudo cargar datos para {year}.\n"
             f"Directorio buscado: {dir_path}\n"
-            f"Archivos disponibles:\n{available_files}\n"
-            f"Error original: {str(e)}"
-        )
-
-@st.cache_data
-def load_clasificador():
-    """Carga el catálogo de insumos"""
-    relative_path = Path("source_data") / "catalogo_insumos_full_description.csv"
-    file_path = resource_path(relative_path)
-    
-    try:
-        return pd.read_csv(file_path, encoding='utf-8-sig', low_memory=False)
-    except Exception as e:
-        available_files = "\n".join(str(p) for p in file_path.parent.glob("*.csv"))
-        raise FileNotFoundError(
-            f"No se pudo cargar el catálogo de insumos.\n"
-            f"Archivo buscado: {file_path}\n"
             f"Archivos disponibles:\n{available_files}\n"
             f"Error original: {str(e)}"
         )
@@ -152,66 +135,72 @@ if year:
     
     dfT = pd.concat(dfTemp, axis=0).reset_index(drop=True)
     dfY = dfT.dropna()
-    dfY["Codigo Insumo"] = dfY["Codigo Insumo"].astype(int)
     
-    # Cargar clasificador
-    dfCI = load_clasificador()
+    # Obtener columnas disponibles para filtrar (excluyendo algunas si es necesario)
+    available_columns = [col for col in dfY.columns if col not in ['Filename', 'index']]
     
-    # Obtener renglones únicos
-    renglones = sorted(dfY["Renglon"].unique().tolist())
-    
-    # Selector de renglón
-    renglon_select = st.sidebar.selectbox(
-        "🔍 Seleccione el renglón:",
-        options=renglones,
+    # Selector de columna para filtrar
+    filter_column = st.sidebar.selectbox(
+        "🔍 Seleccione el campo para filtrar:",
+        options=available_columns,
         index=None,
-        placeholder="Escriba o seleccione..."
+        placeholder="Seleccione una columna..."
     )
     
-    if renglon_select:
-        # Filtrar por renglón
-        df_filtrado = dfY[dfY["Renglon"] == renglon_select].copy()
+    if filter_column:
+        # Obtener valores únicos de la columna seleccionada
+        unique_values = sorted(dfY[filter_column].astype(str).unique().tolist())
         
-        # Obtener información del renglón del clasificador
-        renglon_info = dfCI[dfCI["Renglon"] == renglon_select].iloc[0]
-        
-        # Mostrar información del renglón
-        st.markdown(f"### Renglón {renglon_select}: {renglon_info['Concepto Renglon']}")
-        st.markdown(f"**Subgrupo:** {renglon_info['Nombre Subgrupo']}")
-        st.markdown(f"**Grupo:** {renglon_info['Nombre Grupo']}")
-        
-        # Mostrar dataframe con los productos del renglón
-        st.markdown("### Productos en este renglón")
-        
-        # Renombrar columnas para mejor visualización
-        df_display = df_filtrado.rename(columns={
-            'Codigo Insumo': 'Código',
-            'Insumo Match': 'Descripción',
-            'Unidad de Medida': 'Variedad',
-            'Precio unitario': 'Precio (Q)',
-            'Cantidad Ofertada': 'Cantidad',
-            'Oferente': 'Proveedor',
-            'Comprador': 'Entidad Compradora',
-            'Region Oferente': 'Departamento Proveedor',
-            'Region Comprador': 'Departamento Comprador'
-        })
-        
-        # Columnas a mostrar
-        columnas = ['Código', 'Descripción', 'Variedad', 'Precio (Q)', 'Cantidad', 
-                   'Proveedor', 'Entidad Compradora', 'Departamento Proveedor', 'Departamento Comprador']
-        
-        st.dataframe(
-            df_display[columnas],
-            hide_index=True,
-            use_container_width=True,
-            height=600
+        # Permitir múltiples selecciones o búsqueda
+        selected_values = st.sidebar.multiselect(
+            f"Seleccione valores de {filter_column}:",
+            options=unique_values,
+            default=None,
+            placeholder=f"Escriba o seleccione valores de {filter_column}..."
         )
         
-        # Opción para descargar los datos
-        csv = df_display[columnas].to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="Descargar datos en CSV",
-            data=csv,
-            file_name=f"productos_renglon_{renglon_select}.csv",
-            mime="text/csv"
-        )
+        if selected_values:
+            # Filtrar el dataframe
+            df_filtrado = dfY[dfY[filter_column].astype(str).isin(selected_values)].copy()
+            
+            # Mostrar estadísticas
+            st.markdown(f"### Filtrado por: {filter_column}")
+            st.markdown(f"**Valores seleccionados:** {', '.join(selected_values)}")
+            st.markdown(f"**Registros encontrados:** {len(df_filtrado)}")
+            
+            # Mostrar dataframe con los productos filtrados
+            st.markdown("### Resultados del filtro")
+            
+            # Opción para seleccionar columnas a mostrar
+            default_columns = ['Descripcion', 'Producto', 'Marca', 'Unidad de Medida', 
+                             'Precio unitario', 'Cantidad Ofertada', 'Oferente', 'Comprador']
+            display_columns = st.multiselect(
+                "Seleccione columnas a mostrar:",
+                options=available_columns,
+                default=default_columns
+            )
+            
+            if display_columns:
+                st.dataframe(
+                    df_filtrado[display_columns],
+                    hide_index=True,
+                    use_container_width=True,
+                    height=600
+                )
+                
+                # Opción para descargar los datos
+                csv = df_filtrado[display_columns].to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Descargar datos en CSV",
+                    data=csv,
+                    file_name=f"datos_filtrados_{filter_column}.csv",
+                    mime="text/csv"
+                )
+            else:
+                st.warning("Por favor seleccione al menos una columna para mostrar.")
+        else:
+            st.info(f"Seleccione uno o más valores de {filter_column} para aplicar el filtro.")
+    else:
+        st.info("Seleccione una columna para filtrar los datos.")
+else:
+    st.info("Seleccione uno o más años para cargar los datos.")
