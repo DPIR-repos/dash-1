@@ -1,0 +1,63 @@
+==========================================
+Observatorio de Precios - Aplicación Web
+==========================================
+-------------------------------------------------------
+by elser lopez, 31/07/2025, 
+contacto: elser.adolfo.lopez@gmail.com
+Dirección de Precios e Índices de Referencia (DPIR)
+-------------------------------------------------------
+
+Aplicación web desarrollada con Streamlit con Python 3.10 para visualizar y analizar datos del observatorio de precios.
+Esta aplicación esta inspirada en https://www.usaspending.gov/
+
+Estructura del proyecto
+-------------------------
+├── main.py          				- Archivo principal de la aplicación
+├── observatorio.py  				- Archivo con el observatorio de precios
+├── busquedas_personalizadas.py  	- Archivo que contiene un implementación preliminar para buscar en toda la base de datos tomando diferentes criterios.
+├── documentacion.py  				- Archivo con la documentación básica de los análisis realizados en el observatorio.py
+├── about_source.py				- Archivo que intenta tener la documentación sobre la estructura de la base de datos
+├── run.py							- Archivo que contiene la ejecución de main.py y es necesario solo cuando se quiere convertir la aplicación a un ejecutable .exe
+└── requirements.txt 				- Dependencias mínimas para despliegue en Streamlit Cloud
+
+Base de datos
+----------------------
+La base de datos utilizada es el resultado final que se encuentra en ...\Canasta_Estatal\Final_code\match_data\
+Por cuestiones de computo y de capacidad de la nube de streamlit se utilizaron solo los .csv que se encuentran en esta carpeta
+y solo los documentos con la data por mes y año. 
+Para agregar más años, solo se debe agregar mas .csv siguiendo la misma estructura de carpeta
+
+
+Dentro de esta aplicación la base de datos esta estructura de la siguiente manera
+
+source_data/
+├── data_base_guatecompras/	- Contiene carpetas con los .csv por mes y año de la base de datos con códigos de insumo
+	├──2020/
+	├──2021/   
+	├──2022/  
+	├──2023/  
+	├──2024/
+	└──2025/    
+
+└── concatenate_data/ 			- Contiene la base de datos completa, resultado del proceso combinar la información web y de la API. Sin embargo no contiene códigos de 					  insumo
+	├──2020/
+	├──2021/   
+	├──2022/  
+	├──2023/  
+	├──2024/
+	└──2025/ 
+ 
+Archivos complementarios
+---------------------------
+source_data/
+├──catalogo_insumos_full_description.{csv,xlsx} 	- Archivo con el clasificador de insumos del Ministerio de Finanzas Públicas, este se usa para desplegar la información de 						      las características de cada renglón
+
+├──clasificador_todos_renglones.xlsx				- Archivo con el clasificador de todos los renglones del Ministerio de Finanzas Públicas, este archivo se usa para 								      desplegar la información del nombre, y concepto de cada renglón, subrenglón, etc...
+├──ipc_empreg_es25s.xlsx							- Archivo con el IPC empalmado desde 2001 hasta mayo de 2025 a nivel regional. Este se usa para aplicar la corrección por 						      inflación regional. Este archivo se obtuvo del portal de el INE.
+├──ipc_emprepu_es25.xlsx							- Archivo con el IPC empalmado desde 2001 hasta mayo de 2025 a nivel republica. Este se usa para aplicar la corrección por 						      inflación a nivel republica. Este archivo se obtuvo del portal de el INE.
+├──gadm41_GTM_1.json								- Archivo con la información cartográfica (bordes y limites) a nivel departamento en la republica de Guatemala. Archivo 						      obtenido de https://simplemaps.com/data/gt-cities. Este se utiliza para los mapas a nivel departamento. 	
+├──gadm41_GTM_2.json								- Archivo con la información cartográfica (bordes y limites) a nivel municipio en la republica de Guatemala. Archivo 						              obtenido de https://simplemaps.com/data/gt-cities. Este se utiliza para los mapas a nivel departamento.
+├──DPIR_logo.png 									- Logo de la Dirección de Precios e Indices de Referencia en grande, con bordes grandes, con fondo transparente. 
+├──DPIR_logo_2.png									- Logo de la Dirección de Precios e Indices de Referencia en grande, con bordes pequeños, con fondo transparente.
+
+

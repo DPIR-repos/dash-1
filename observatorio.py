@@ -2099,6 +2099,7 @@ def plot_Hvariety(dfVariety, variedad, CL=95, Inflacion=False, dfInflacion=None,
     
     return [fig_original, fig_corregido], df_stats
 
+
 def obtener_orden_variedades(df_filtrado):
     """Devuelve las variedades ordenadas por cantidad ofertada (de mayor a menor)"""
     df_orden = df_filtrado.groupby('Unidad de Medida')['Cantidad Ofertada'].sum().reset_index()
@@ -2694,6 +2695,30 @@ def load_inflacion(inflacion_choice):
             f"Error original: {str(e)}"
         )
 
+
+def load_year_disp():
+    year_dir = Path("source_data") / "data_base_guatecompras"
+    
+    # Verificar si el directorio existe
+    if not year_dir.exists() or not year_dir.is_dir():
+        return []
+    
+    # Obtener solo los directorios y filtrar por nombres que son números enteros
+    year_folders = []
+    for item in year_dir.iterdir():
+        if item.is_dir():
+            try:
+                year = int(item.name)
+                year_folders.append(year)
+            except ValueError:
+                # Si el nombre no es un número entero, lo ignoramos
+                continue
+    
+    # Ordenar la lista de años (opcional)
+    year_folders.sort()
+    
+    return year_folders
+
 #===============================
 # Page configuration
 #===============================
@@ -2739,7 +2764,7 @@ st.sidebar.image(image)
 
 st.sidebar.header("Filtros")
 
-years_disp = [2020, 2021, 2022, 2023, 2024]
+years_disp = load_year_disp()  #[2020, 2021, 2022, 2023, 2024] #años disponibles en la base de datos
 
 
 # Mostrar multiselect
