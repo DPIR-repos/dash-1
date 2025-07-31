@@ -2,6 +2,7 @@ import streamlit as st
 from pathlib import Path
 import os
 import sys
+#by elser lopez
 
 def resource_path(file_path, local_folder_name=None):
     """
