@@ -1,6 +1,6 @@
 # Dashboard
 # Elser lopez, DPIR
-# 31/07/2025
+# 31/07/2025#comentario
 import streamlit as st
 import pandas as pd
 import altair as alt
