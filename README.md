@@ -6,7 +6,7 @@ contacto: elser.adolfo.lopez@gmail.com
 Dirección de Precios e Índices de Referencia (DPIR)  
 ---
 
-Aplicación web desarrollada con Streamlit con Python 3.10 para visualizar y analizar datos del observatorio de precios.  
+Aplicación web desarrollada con Streamlit y Python 3.10 para visualizar y analizar datos del observatorio de precios.  
 Esta aplicación está inspirada en [https://www.usaspending.gov/](https://www.usaspending.gov/)
 
 ## Estructura del proyecto
