@@ -2845,13 +2845,13 @@ if len(year) >= 1:
         # Agrupar por mes y año, contar ocurrencias para obtener los pares existentes
         meses_con_anio = dfY.groupby(['Mes Publicacion', 'Anio Publicacion']).size().reset_index()
         meses_con_anio['Etiqueta'] = meses_con_anio.apply(
-            lambda x: f"{meses_short[x['Mes Publicacion']]}-{x['Anio Publicacion']}", 
+            lambda x: f"{meses_short[x['Mes Publicacion']]}-{int(x['Anio Publicacion'])}", 
             axis=1
         )
     else:
         meses_con_anio = dfY.groupby(['Mes Adjudicacion', 'Anio Adjudicacion']).size().reset_index()
         meses_con_anio['Etiqueta'] = meses_con_anio.apply(
-            lambda x: f"{meses_short[x['Mes Adjudicacion']]}-{x['Anio Adjudicacion']}", 
+            lambda x: f"{meses_short[x['Mes Adjudicacion']]}-{int(x['Anio Adjudicacion'])}", 
             axis=1
         )
     
