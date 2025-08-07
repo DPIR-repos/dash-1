@@ -2813,6 +2813,8 @@ if len(year)>=1:
             
     dfT = pd.concat(dfTemp, axis=0).reset_index(drop=True)
     dfY=dfT.dropna() #Dataframe con los anios 
+    dfY=dfY['Anio Publicacion'].astype(int)
+    dfY=dfY['Anio Adjudicacion'].astype(int)
     
     # Agregar filtros de mes en la barra lateral
     st.sidebar.markdown("---")
@@ -3866,4 +3868,5 @@ with col2Logo:
     st.markdown(" ")
     image_path = resource_path(current_folder/ soruce_folder/ "DPIR_logo_2.png")
     image=Image.open(image_path)
+
     st.image(image)
