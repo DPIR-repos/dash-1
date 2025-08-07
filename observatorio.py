@@ -2842,7 +2842,7 @@ if len(year)>=1:
         )
     
     # Ordenar cronológicamente
-    meses_con_anio = meses_con_año.sort_values(
+    meses_con_anio = meses_con_anio.sort_values(
         by=['Anio Publicacion' if tipo_mes == "Publicación" else 'Anio Adjudicacion', 
             'Mes Publicacion' if tipo_mes == "Publicación" else 'Mes Adjudicacion']
     )
