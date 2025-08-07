@@ -2808,6 +2808,7 @@ if len(year) >= 1:
         # Cargar todos los años, asegurando que sean enteros
         for k in years_disp:
             df_year = load_data_year(k)
+            df_year.dropna()
             # Asegurar que las columnas de año sean enteros
             df_year['Anio Publicacion'] = df_year['Anio Publicacion'].astype(int)
             df_year['Anio Adjudicacion'] = df_year['Anio Adjudicacion'].astype(int)
@@ -2816,6 +2817,7 @@ if len(year) >= 1:
         # Cargar años seleccionados, convirtiéndolos a enteros primero
         for k in year:
             df_year = load_data_year(int(k))  # Convertir a entero aquí
+            df_year.dropna()
             df_year['Anio Publicacion'] = df_year['Anio Publicacion'].astype(int)
             df_year['Anio Adjudicacion'] = df_year['Anio Adjudicacion'].astype(int)
             dfTemp.append(df_year)
