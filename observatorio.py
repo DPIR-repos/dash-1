@@ -2810,10 +2810,11 @@ if len(year)>=1:
     else:
         for k in year:
             dfTemp.append(load_data_year(k))
-    
+            
     dfT = pd.concat(dfTemp, axis=0).reset_index(drop=True)
-    dfY=dfT.dropna() #Dataframe con los anios
-  # Agregar filtros de mes en la barra lateral
+    dfY=dfT.dropna() #Dataframe con los anios 
+    
+    # Agregar filtros de mes en la barra lateral
     st.sidebar.markdown("---")
     st.sidebar.markdown("**Filtros por mes**")
     
@@ -2825,36 +2826,54 @@ if len(year)>=1:
         horizontal=True
     )
     
-    # Crear lista de meses disponibles basado en el DataFrame cargado
+    # Crear lista de meses disponibles con año
     if tipo_mes == "Publicación":
-        meses_disponibles = sorted(dfY['Mes Publicacion'].unique())
+        # Agrupar por mes y año, contar ocurrencias para obtener los pares existentes
+        meses_con_anio = dfY.groupby(['Mes Publicacion', 'Anio Publicacion']).size().reset_index()
+        meses_con_anio['Etiqueta'] = meses_con_anio.apply(
+            lambda x: f"{meses_short[x['Mes Publicacion']]}-{x['Anio Publicacion']}", 
+            axis=1
+        )
     else:
-        meses_disponibles = sorted(dfY['Mes Adjudicacion'].unique())
+        meses_con_anio = dfY.groupby(['Mes Adjudicacion', 'Anio Adjudicacion']).size().reset_index()
+        meses_con_anio['Etiqueta'] = meses_con_anio.apply(
+            lambda x: f"{meses_short[x['Mes Adjudicacion']]}-{x['Anio Adjudicacion']}", 
+            axis=1
+        )
     
-    # Convertir números de mes a nombres
-    meses_nombres = ['Todos'] + [meses_long[m] for m in meses_disponibles]
+    # Ordenar cronológicamente
+    meses_con_anio = meses_con_año.sort_values(
+        by=['Anio Publicacion' if tipo_mes == "Publicación" else 'Anio Adjudicacion', 
+            'Mes Publicacion' if tipo_mes == "Publicación" else 'Mes Adjudicacion']
+    )
     
-    # Selector de meses
+    # Selector de meses con año
     meses_seleccionados = st.sidebar.multiselect(
         f"Seleccione mes(es) de {tipo_mes.lower()}:",
-        options=meses_nombres,
+        options=['Todos'] + meses_con_anio['Etiqueta'].tolist(),
         default=None,
         placeholder="Escriba o seleccione..."
     )
     
     # Aplicar filtro de meses si no se seleccionó "Todos"
-    if meses_seleccionados:
-        if 'Todos' not in meses_seleccionados:
-            # Convertir nombres de mes a números
-            meses_numeros = [meses_dicReverse[m] for m in meses_seleccionados if m != 'Todos']
-            
-            if tipo_mes == "Publicación":
-                dfY = dfY[dfY['Mes Publicacion'].isin(meses_numeros)].copy()
-            else:
-                dfY = dfY[dfY['Mes Adjudicacion'].isin(meses_numeros)].copy()            
+    if meses_seleccionados and 'Todos' not in meses_seleccionados:
+        # Extraer mes y año de las etiquetas seleccionadas
+        seleccionados_split = [m.split('-') for m in meses_seleccionados]
+        meses_filtro = [meses_short_inverse[m[0]] for m in seleccionados_split]
+        anios_filtro = [int(m[1]) for m in seleccionados_split]
+        
+        if tipo_mes == "Publicación":
+            dfY = dfY[
+                (dfY['Mes Publicacion'].isin(meses_filtro)) & 
+                (dfY['Anio Publicacion'].isin(anios_filtro))
+            ].copy()
+        else:
+            dfY = dfY[
+                (dfY['Mes Adjudicacion'].isin(meses_filtro)) & 
+                (dfY['Anio Adjudicacion'].isin(anios_filtro))
+            ].copy()
     
-            
-    
+    # Resto del código continúa igual...
 
     dfY["Codigo Insumo"] = dfY["Codigo Insumo"].astype(int)
     codigos_insumo =sorted( dfY["Codigo Insumo"].unique().tolist())
@@ -3847,5 +3866,4 @@ with col2Logo:
     st.markdown(" ")
     image_path = resource_path(current_folder/ soruce_folder/ "DPIR_logo_2.png")
     image=Image.open(image_path)
-
     st.image(image)
