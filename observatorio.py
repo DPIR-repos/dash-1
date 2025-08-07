@@ -2813,8 +2813,8 @@ if len(year)>=1:
             
     dfT = pd.concat(dfTemp, axis=0).reset_index(drop=True)
     dfY=dfT.dropna() #Dataframe con los anios 
-    dfY=dfY['Anio Adjudicacion'].astype(int)
-    dfY=dfY['Anio Publicacion'].astype(int)
+    dfY['Anio Adjudicacion']=dfY['Anio Adjudicacion'].astype(int)
+    dfY['Anio Adjudicacion']=dfY['Anio Publicacion'].astype(int)
     
     # Agregar filtros de mes en la barra lateral
     st.sidebar.markdown("---")
