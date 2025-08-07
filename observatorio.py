@@ -2810,7 +2810,10 @@ if len(year)>=1:
     else:
         for k in year:
             dfTemp.append(load_data_year(k))
-    # Agregar filtros de mes en la barra lateral
+    
+    dfT = pd.concat(dfTemp, axis=0).reset_index(drop=True)
+    dfY=dfT.dropna() #Dataframe con los anios
+  # Agregar filtros de mes en la barra lateral
     st.sidebar.markdown("---")
     st.sidebar.markdown("**Filtros por mes**")
     
@@ -2851,8 +2854,7 @@ if len(year)>=1:
                 dfY = dfY[dfY['Mes Adjudicacion'].isin(meses_numeros)].copy()            
     
             
-    dfT = pd.concat(dfTemp, axis=0).reset_index(drop=True)
-    dfY=dfT.dropna() #Dataframe con los anios
+    
 
     dfY["Codigo Insumo"] = dfY["Codigo Insumo"].astype(int)
     codigos_insumo =sorted( dfY["Codigo Insumo"].unique().tolist())
@@ -3845,4 +3847,5 @@ with col2Logo:
     st.markdown(" ")
     image_path = resource_path(current_folder/ soruce_folder/ "DPIR_logo_2.png")
     image=Image.open(image_path)
+
     st.image(image)
