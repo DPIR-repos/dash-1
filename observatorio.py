@@ -2779,6 +2779,8 @@ year = st.sidebar.multiselect(
 )
 
 
+
+
 st.markdown("## OBSERVATORIO DE PRECIOS ESTATALES")
 st.markdown("---")
 
@@ -2808,9 +2810,50 @@ if len(year)>=1:
     else:
         for k in year:
             dfTemp.append(load_data_year(k))
+    # Agregar filtros de mes en la barra lateral
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("**Filtros por mes**")
+    
+    # Opción para seleccionar tipo de mes (publicación o adjudicación)
+    tipo_mes = st.sidebar.radio(
+        "Filtrar por mes de:",
+        options=["Publicación", "Adjudicación"],
+        index=0,
+        horizontal=True
+    )
+    
+    # Crear lista de meses disponibles basado en el DataFrame cargado
+    if tipo_mes == "Publicación":
+        meses_disponibles = sorted(dfY['Mes Publicacion'].unique())
+    else:
+        meses_disponibles = sorted(dfY['Mes Adjudicacion'].unique())
+    
+    # Convertir números de mes a nombres
+    meses_nombres = ['Todos'] + [meses_long[m] for m in meses_disponibles]
+    
+    # Selector de meses
+    meses_seleccionados = st.sidebar.multiselect(
+        f"Seleccione mes(es) de {tipo_mes.lower()}:",
+        options=meses_nombres,
+        default=None,
+        placeholder="Escriba o seleccione..."
+    )
+    
+    # Aplicar filtro de meses si no se seleccionó "Todos"
+    if meses_seleccionados:
+        if 'Todos' not in meses_seleccionados:
+            # Convertir nombres de mes a números
+            meses_numeros = [meses_dicReverse[m] for m in meses_seleccionados if m != 'Todos']
+            
+            if tipo_mes == "Publicación":
+                dfY = dfY[dfY['Mes Publicacion'].isin(meses_numeros)].copy()
+            else:
+                dfY = dfY[dfY['Mes Adjudicacion'].isin(meses_numeros)].copy()            
+    
             
     dfT = pd.concat(dfTemp, axis=0).reset_index(drop=True)
-    dfY=dfT.dropna()
+    dfY=dfT.dropna() #Dataframe con los anios
+
     dfY["Codigo Insumo"] = dfY["Codigo Insumo"].astype(int)
     codigos_insumo =sorted( dfY["Codigo Insumo"].unique().tolist())
     dfG_dep=load_GEOdata('departamento')
