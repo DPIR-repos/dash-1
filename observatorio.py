@@ -2779,6 +2779,8 @@ year = st.sidebar.multiselect(
 )
 
 
+
+
 st.markdown("## OBSERVATORIO DE PRECIOS ESTATALES")
 st.markdown("---")
 
@@ -2800,17 +2802,95 @@ meses_short_inverse={'Ene':1, 'Feb':2, 'Mar':3, 'Abr':4, 'May':5, 'Jun':6, 'Jul'
 #Meese par ser tomados en la inflacion
 meses_dicReverse={'Enero':1, 'Febrero':2, 'Marzo':3, 'Abril':4, 'Mayo':5, 'Junio':6, 'Julio':7, 'Agosto':8, 'Septiembre':9, 'Octubre':10, 'Noviembre':11, 'Diciembre':12}
 
-if len(year)>=1:
-    dfTemp=[] #lista de dataframes por año
+if len(year) >= 1:
+    dfTemp = []  # lista de dataframes por año
     if any(str(t).lower() == 'todos' for t in year):
+        # Cargar todos los años, asegurando que sean enteros
         for k in years_disp:
-            dfTemp.append(load_data_year(k))
+            df_year = load_data_year(k)
+            df_year.dropna()
+            # Asegurar que las columnas de año sean enteros
+            df_year['Anio Publicacion'] = df_year['Anio Publicacion'].astype(int)
+            df_year['Anio Adjudicacion'] = df_year['Anio Adjudicacion'].astype(int)
+            dfTemp.append(df_year)
     else:
+        # Cargar años seleccionados, convirtiéndolos a enteros primero
         for k in year:
-            dfTemp.append(load_data_year(k))
+            df_year = load_data_year(int(k))  # Convertir a entero aquí
+            df_year.dropna()
+            df_year['Anio Publicacion'] = df_year['Anio Publicacion'].astype(int)
+            df_year['Anio Adjudicacion'] = df_year['Anio Adjudicacion'].astype(int)
+            dfTemp.append(df_year)
             
     dfT = pd.concat(dfTemp, axis=0).reset_index(drop=True)
-    dfY=dfT.dropna()
+    
+    # Eliminar esta línea redundante y potencialmente problemática:
+    # dfT['Anio Adjudicacion'] = dfT['Anio Publicacion'].astype(int)
+    
+    dfY = dfT.dropna()  # Dataframe con los años
+
+    dfY=dfT.dropna() #Dataframe con los anios 
+    # Agregar filtros de mes en la barra lateral
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("**Filtros por mes**")
+    
+    # Opción para seleccionar tipo de mes (publicación o adjudicación)
+    tipo_mes = st.sidebar.radio(
+        "Filtrar por mes de:",
+        options=["Publicación", "Adjudicación"],
+        index=0,
+        horizontal=True
+    )
+    
+    # Crear lista de meses disponibles con año
+    if tipo_mes == "Publicación":
+        # Agrupar por mes y año, contar ocurrencias para obtener los pares existentes
+        meses_con_anio = dfY.groupby(['Mes Publicacion', 'Anio Publicacion']).size().reset_index()
+        meses_con_anio['Etiqueta'] = meses_con_anio.apply(
+            lambda x: f"{meses_short[x['Mes Publicacion']]}-{int(x['Anio Publicacion'])}", 
+            axis=1
+        )
+    else:
+        meses_con_anio = dfY.groupby(['Mes Adjudicacion', 'Anio Adjudicacion']).size().reset_index()
+        meses_con_anio['Etiqueta'] = meses_con_anio.apply(
+            lambda x: f"{meses_short[x['Mes Adjudicacion']]}-{int(x['Anio Adjudicacion'])}", 
+            axis=1
+        )
+    
+    # Ordenar cronológicamente
+    meses_con_anio = meses_con_anio.sort_values(
+        by=['Anio Publicacion' if tipo_mes == "Publicación" else 'Anio Adjudicacion', 
+            'Mes Publicacion' if tipo_mes == "Publicación" else 'Mes Adjudicacion']
+    )
+    
+    # Selector de meses con año
+    meses_seleccionados = st.sidebar.multiselect(
+        f"Seleccione mes(es) de {tipo_mes.lower()}:",
+        options=['Todos'] + meses_con_anio['Etiqueta'].tolist(),
+        default=None,
+        placeholder="Escriba o seleccione..."
+    )
+    
+    # Aplicar filtro de meses si no se seleccionó "Todos"
+    if meses_seleccionados and 'Todos' not in meses_seleccionados:
+        # Extraer mes y año de las etiquetas seleccionadas
+        seleccionados_split = [m.split('-') for m in meses_seleccionados]
+        meses_filtro = [meses_short_inverse[m[0]] for m in seleccionados_split]
+        anios_filtro = [int(m[1]) for m in seleccionados_split]
+        
+        if tipo_mes == "Publicación":
+            dfY = dfY[
+                (dfY['Mes Publicacion'].isin(meses_filtro)) & 
+                (dfY['Anio Publicacion'].isin(anios_filtro))
+            ].copy()
+        else:
+            dfY = dfY[
+                (dfY['Mes Adjudicacion'].isin(meses_filtro)) & 
+                (dfY['Anio Adjudicacion'].isin(anios_filtro))
+            ].copy()
+    
+    # Resto del código continúa igual...
+
     dfY["Codigo Insumo"] = dfY["Codigo Insumo"].astype(int)
     codigos_insumo =sorted( dfY["Codigo Insumo"].unique().tolist())
     dfG_dep=load_GEOdata('departamento')
