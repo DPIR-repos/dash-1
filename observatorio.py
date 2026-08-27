@@ -2951,6 +2951,7 @@ if len(year) >= 1:
         if len(df_filtrado)<=0:
             st.warning(f"No hay coincidencias con el nivel actual de similitud -> score={score_option}")    
         current_group=dfCI[dfCI["Grupo"]==int(df_filtrado['Grupo'].iloc[0])].copy()
+        current_group=current_group[current_group["Subgrupo"] == int(df_filtrado['Subgrupo'].iloc[0])].copy()
         # Obtenemos las variedades solo para los códigos seleccionados
         #orden de las variedades
         orden_variedades = obtener_orden_variedades(df_filtrado)
